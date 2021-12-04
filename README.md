@@ -2,6 +2,8 @@
 Nginx terraform deployment to AWS
 # ToDo
  1. remove ssh access from sg - for production deployment. Maybe add ssm access ?
+ 2. terraform/ec2-userdata.yaml  chainge branche from "test" to "main" git checkout
+ 3. remove terraform/asg+lb.tf if not planning to use it.
 
 # Exercise (Infra)
 Use Ansible and/or Terraform to automate the process of creating an AWS EC2 instance and
@@ -40,7 +42,7 @@ infrastructure automation and execute the script(s).
       1. downtime due to AZ outage or vm outage, single instance in single az
          - use more than one instance multi az
          - if only static content, consider using s3 + cloudfront for the content hosting
-         
+
 Bonus Points
 1. Show the result of the resource.log on a webpage served from the NGINX server
 if you have any questions about the assignment feel free to reach out to us.

@@ -1,8 +1,19 @@
+resource "aws_eip" "website" {
+  vpc      = true
+  tags = {
+      Name = "${var.prefix}-web-server"
+  }
+}
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = aws_instance.server.id
+  allocation_id = aws_eip.website.id
+}
+
 resource "aws_instance" "server" {
   ami           = data.aws_ami.amazon-linux-2.id
   instance_type = "t2.micro"
   subnet_id = module.vpc.public_subnets[0]
-  associate_public_ip_address = true
+  # associate_public_ip_address = true  # Use eip
   vpc_security_group_ids = flatten([
                               module.security_group.security_group_id, 
                             ])

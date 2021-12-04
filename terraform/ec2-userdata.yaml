@@ -7,6 +7,7 @@ swap:
 packages:
   - docker
   - git
+  - vim
   #- zsh
   #- mc
   #- awscli
@@ -14,7 +15,8 @@ package_update: true
 package_upgrade: true
 package_reboot_if_required: true
 runcmd:
-  - [ git, clone, --branch, test,  https://github.com/diepes/EngAssNginx.git, /opt/gitrepo]
+  - [ git, clone, --branch, test, "https://github.com/diepes/EngAssNginx.git", /opt/gitrepo ]
+  - echo "*/5 * * * * /opt/gitrepo/scripts/cron.sh 2>&1 | /dev/null" > /etc/cron.d/gitrepo
   - [ systemctl, daemon-reload ]
   - [ systemctl, enable, docker.service ]
   - [ systemctl, start, --no-block, docker.service ]
