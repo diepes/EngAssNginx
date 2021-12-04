@@ -16,8 +16,7 @@ package_upgrade: true
 package_reboot_if_required: true
 runcmd:
   - [ git, clone, --branch, test, "https://github.com/diepes/EngAssNginx.git", /opt/gitrepo ]
-  - [ /opt/gitrepo/scripts/scripts/cloud-config-initial-setup.sh, ]
-
+  - [ /opt/gitrepo/scripts/cloud-config-initial-setup.sh, ]
 #groups:
 # write_files:
 
