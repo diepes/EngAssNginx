@@ -1,4 +1,5 @@
 #cloud-config
+# deployed as part of terraform deployment.
 hostname: ${HOSTNAME}
 swap:
   filename: /swapfile01
