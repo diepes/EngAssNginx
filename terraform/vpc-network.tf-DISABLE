@@ -1,0 +1,34 @@
+resource "aws_vpc" "hosting" {
+  cidr_block       = "10.0.0.0/16"
+  instance_tenancy = "default"  # default=shared 
+
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+  tags = {
+    Name = "${var.prefix}-vpc"
+  }
+}
+output "vpc_id" {
+    value = aws_vpc.hosting.id
+}
+
+resource "aws_subnet" "public" {
+  vpc_id     = aws_vpc.hosting.id
+  cidr_block = "10.0.1.0/24"
+  # availability_zone  #single subnet
+
+  tags = {
+    Name = "${var.prefix}-public"
+  }
+}
+output "subnets_public" {
+    value = [aws_subnet.public.id, ]
+}
+
+# Internet gateway and nat for public IP's
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.hosting.id
+  tags = {
+    Name = "${var.prefix}-gw"
+  }
+}
