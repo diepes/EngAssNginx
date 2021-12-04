@@ -1,0 +1,18 @@
+[Unit]
+Description=Nginx Docker Service
+After=docker.service
+Requires=docker.service
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker stop nginx
+ExecStartPre=-/usr/bin/docker rm nginx
+ExecStartPre=/usr/bin/docker pull nginx:stable
+ExecStart=/usr/bin/docker run --name nginx \
+                              --rm \
+                              -v /opt/gitrepo/html:/usr/share/nginx/html:ro \
+                              -v /opt/gitrepo/scripts/nginx-stub_status.config /etc/nginx/conf.d/stub_status:ro \
+                              -p 80:80 -p 81:81 \
+                              nginx:stable
+[Install]
+WantedBy=multi-user.target

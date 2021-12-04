@@ -16,43 +16,9 @@ package_upgrade: true
 package_reboot_if_required: true
 runcmd:
   - [ git, clone, --branch, test, "https://github.com/diepes/EngAssNginx.git", /opt/gitrepo ]
-  - echo "*/5 * * * * /opt/gitrepo/scripts/cron.sh 2>&1 | /dev/null" > /etc/cron.d/gitrepo
-  - [ systemctl, daemon-reload ]
-  - [ systemctl, enable, docker.service ]
-  - [ systemctl, start, --no-block, docker.service ]
-  - [ systemctl, enable, docker.nginx.service ]
-  - [ systemctl, start, --no-block, docker.nginx.service]
-groups:
-  - docker: [root,ec2-user]
-write_files:
-- path: /etc/systemd/system/docker.nginx.service
-  permissions: '0644'
-  owner: root:root
-  content: |
-      [Unit]
-      Description=Nginx Docker Service
-      After=docker.service
-      Requires=docker.service
-      # After=docker.?.service
-      [Service]
-      TimeoutStartSec=0
-      Restart=always
-      ExecStartPre=-/usr/bin/docker stop nginx
-      ExecStartPre=-/usr/bin/docker rm nginx
-      ExecStartPre=/usr/bin/docker pull nginx:stable
-      ExecStart=/usr/bin/docker run --name nginx --rm -v /opt/gitrepo/html:/usr/share/nginx/html:ro -p 80:80 -p 81:81 nginx:stable
-      [Install]
-      WantedBy=multi-user.target
-- path: /content/index.html
-  permissions: '644'
-  content: | 
-      Welcome to Pieter's flash website !  
-- path: /etc/nginx/stub_status-config
-  permissions: '444'
-  content: |      
-      server {
-        listen 81;
-        location /status { stub_status; }
-      }
+  - [ /opt/gitrepo/scripts/scripts/cloud-config-initial-setup.sh, ]
+
+#groups:
+# write_files:
 
 final_message: "The system is finally up, after $UPTIME seconds"
