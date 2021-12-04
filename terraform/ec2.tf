@@ -23,11 +23,7 @@ resource "aws_instance" "server" {
     Name = "${var.prefix}-web-server"
   }
 }
-output "aws_instance_server_public_ip" {
-    value = aws_instance.server.public_ip
-}
 
-# Note: key will be replaced everytime
 resource "aws_key_pair" "ssh_key" {
   key_name   = "nginx_server"
   public_key = file(pathexpand(var.pub_key_path))
