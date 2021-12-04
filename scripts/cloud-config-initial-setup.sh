@@ -11,6 +11,6 @@ systemctl enable docker.nginx.service
 systemctl start --no-block docker.nginx.service
 
 
-echo "*/5 * * * * /opt/gitrepo/scripts/cron.sh 2>&1 | /dev/null" > /etc/cron.d/gitrepo
+echo "*/5 * * * * root /opt/gitrepo/scripts/cron.sh 2>&1 | /dev/null" > /etc/cron.d/gitrepo
 
 # The END.
