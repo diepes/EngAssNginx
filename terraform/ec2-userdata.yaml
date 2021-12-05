@@ -8,7 +8,8 @@ swap:
 packages:
   - docker
   - git
-  - vim
+  - uvicorn
+  #- vim
   #- zsh
   #- mc
   #- awscli
@@ -16,7 +17,8 @@ package_update: true
 package_upgrade: true
 package_reboot_if_required: true
 runcmd:
-  - [ git, clone, --branch, test, "https://github.com/diepes/EngAssNginx.git", /opt/gitrepo ]
+  - [ git, clone, --branch, test, "https://github.com/diepes/EngAssNginx.git", /opt/gitrepo, ]
+  - [ python3, -m, pip, install, "fastapi[all]", "fastapi-utils", ]
   - [ /opt/gitrepo/scripts/cloud-config-initial-setup.sh, ]
 #groups:
 # write_files:
