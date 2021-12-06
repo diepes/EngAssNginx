@@ -1,28 +1,8 @@
 # # Leave for now, no requirement for HA, rolling updates or SSL+Cert
 # # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group
 
-# resource "aws_placement_group" "cluster" {
-#   name     = "${var.prefix}-cluster"
-#   strategy = "cluster"
-# }
-
-# resource "aws_autoscaling_group" "nginx" {
-#   availability_zones = [ var.region ]
-#   desired_capacity   = 1
-#   max_size           = 1
-#   min_size           = 1
-
-#   launch_template {
-#     id      = aws_launch_template.nginx.id
-#     version = "$Latest"
-#   }
-# }
-
-# resource "aws_acm_certificate" "front_end" {
-#   # ...
-# }
 resource "aws_security_group" "lb" {
-  name        = "allow_web"
+  name        = "${var.prefix}-lb-pubic"
   description = "Allow http/https inbound traffic"
   vpc_id      = module.vpc.vpc_id
   ingress {
@@ -51,7 +31,7 @@ resource "aws_security_group" "lb" {
   }
 
   tags = {
-    Name = "allow_tls"
+    Name = "${var.prefix}-lb-public"
   }
 }
 resource "aws_lb" "front_end" {
@@ -62,6 +42,10 @@ resource "aws_lb" "front_end" {
   subnets       = module.vpc.public_subnets
   enable_deletion_protection = false
   #tags = var.lb_tags
+  depends_on = [
+    aws_security_group.lb,
+    aws_lb_target_group.front_end,
+  ]
 }
 resource "aws_lb_listener" "front_end" {
   load_balancer_arn = aws_lb.front_end.arn
@@ -82,11 +66,12 @@ resource "aws_lb_target_group" "front_end" {
   protocol = "HTTP"
   vpc_id   = module.vpc.vpc_id
 }
-resource "aws_lb_target_group_attachment" "front_end" {
-  target_group_arn = aws_lb_target_group.front_end.arn
-  target_id        = aws_instance.server.id
-  port             = 8080
+# Create a new ALB Target Group attachment
+resource "aws_autoscaling_attachment" "front_end" {
+  autoscaling_group_name = aws_autoscaling_group.front-end.id
+  alb_target_group_arn   = aws_lb_target_group.front_end.arn
 }
+
 # resource "aws_lb_listener_certificate" "front_end" {
 #   listener_arn    = aws_lb_listener.front_end.arn
 #   certificate_arn = aws_acm_certificate.front_end.arn

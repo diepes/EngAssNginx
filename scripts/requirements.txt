@@ -1,0 +1,4 @@
+fastapi[all]
+fastapi-utils
+aiohttp
+pytz

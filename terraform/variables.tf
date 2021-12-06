@@ -9,9 +9,6 @@ variable "aws_region" {
   default = "ap-southeast-2"
   #default = "us-west-2"
 }
-output "aws_region" {
-  value = var.aws_region
-}
 
 variable "prefix" {
     type    = string
