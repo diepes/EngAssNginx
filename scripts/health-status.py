@@ -3,6 +3,8 @@ from fastapi import FastAPI
 from fastapi_utils.tasks import repeat_every
 import logging
 from fastapi.logger import logger as fastapi_logger
+from pydantic import BaseModel
+from typing import List, Optional, Dict
 import asyncio
 import aiohttp
 import re
@@ -28,13 +30,50 @@ config = {
     #status_url: "http://127.0.0.1:81/nginx-status",
     "log_file":   "/var/log/monitor-nginx.log",
     "status_url": "http://52.64.137.163:81/nginx_status",
+    "logdata" : list(),
 }
 global counter
 counter = 1
 
+class LogMsg(BaseModel):
+  date: datetime.datetime
+  logmsg: dict
+
+#class Logs(BaseModel):
+#    logs: list[LogMsg]
+
+db: List[LogMsg] = []
+
+@app.on_event("startup")
+async def loadLogs():
+    linecount = 0
+    with open(config["log_file"], "r") as file_object:
+        for line in file_object.readlines():
+            if line.strip():
+                await addLogToDb(json.loads(line))
+                linecount += 1
+    print(f"Loaded {linecount} log lines len(db):{len(db)}")
+
+async def addLogToDb(log: dict):
+    maxlen = 6 * 60 * 24 * 7
+    db.insert(0, LogMsg( date = log['time'], logmsg = log))    
+    if len(db) > maxlen:
+        del db[maxlen:]
+
+
+@app.get("/logs")
+async def fetch_logs():
+    return db
+       
+
+
 @app.get("/")
 async def root():
     return {"message": f"Hello World counter={counter}"}
+
+async def getLogs():
+    logdata = config.logdata  # List containing log lines
+
 
 async def count():
     global counter
@@ -60,6 +99,7 @@ async def run_10s_schedule():
     status_nginx  = await task_nginx
     logger.debug( "retrieved status results")
     status = {"time": local_now.isoformat(), "docker" : status_docker, "nginx": status_nginx}
+    await addLogToDb(status)
     with open(config["log_file"], "a") as file_object:
         file_object.write(json.dumps(status))
         file_object.write('\n')
