@@ -30,6 +30,7 @@ override.tf.json
 
 #Python
 __pycache__
+flag-this-is-dev.txt
 #Secrets
 *credentials*
 #Logs

@@ -11,6 +11,7 @@ import re
 import json
 import datetime
 import pytz
+import os
 #from yarl import cache_configure
 logger = logging.getLogger("repeat")
 # # Console handler
@@ -25,13 +26,16 @@ app = FastAPI()
 # fastapi_logger.warn("Start warn - logger.")
  
 global config
-config = {
-    #"log_file": "/opt/gitrepo/html/resource.log",
-    #status_url: "http://127.0.0.1:81/nginx-status",
-    "log_file":   "/var/log/monitor-nginx.log",
-    "status_url": "http://52.64.137.163:81/nginx_status",
-    "logdata" : list(),
-}
+if os.path.isfile("flag-this-is-dev.txt"):
+    config = {  # Developement
+        "log_file":   "/var/log/monitor-nginx.log",
+        "status_url": "http://52.64.137.163:81/nginx_status",
+    }
+else:
+    config = {  # Production
+        "log_file":   "/opt/gitrepo/html/resource.log",
+        "status_url": "http://127.0.0.1:81/nginx-status",
+    }
 global counter
 counter = 1
 
@@ -55,6 +59,7 @@ async def loadLogs():
     print(f"Loaded {linecount} log lines len(db):{len(db)}")
 
 async def addLogToDb(log: dict):
+    # Limit in memory to 7days @10sec = 60480 entries
     maxlen = 6 * 60 * 24 * 7
     db.insert(0, LogMsg( date = log['time'], logmsg = log))    
     if len(db) > maxlen:
