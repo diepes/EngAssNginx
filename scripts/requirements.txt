@@ -2,3 +2,5 @@ fastapi[all]
 fastapi-utils
 aiohttp
 pytz
+#uvicorn
+#gunicorn

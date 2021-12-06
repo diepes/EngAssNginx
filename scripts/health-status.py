@@ -23,7 +23,7 @@ app = FastAPI()
 # fastapi_logger.setLevel(logging.DEBUG)  # :( ignored still only warn level logs
 # fastapi_logger.debug("Start debug - logger.")
 # fastapi_logger.info("Start info - logger.")
-# fastapi_logger.warn("Start warn - logger.")
+# fastapi_logger.warning("Start warn - logger.")
  
 global config
 if os.path.isfile("flag-this-is-dev.txt"):
@@ -62,7 +62,7 @@ async def loadLogs():
                     linecount += 1
         logger.info(f"loadLogs: Loaded {linecount} log lines len(db):{len(db)}")
     else:
-        logger.warn(f"loadLogs: no log file {config['log_file']}")
+        logger.warning(f"loadLogs: no log file {config['log_file']}")
 
 async def addLogToDb(log: dict):
     # Limit in memory to 7days @10sec = 60480 entries
