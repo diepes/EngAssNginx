@@ -57,15 +57,15 @@ module "security_group" {
 
   ingress_cidr_blocks = ["0.0.0.0/0"]
   # https://github.com/terraform-aws-modules/terraform-aws-security-group/blob/master/rules.tf
-  ingress_rules       = ["https-443-tcp", "http-80-tcp", "all-icmp", "ssh-tcp"]
-    ingress_with_cidr_blocks = [
-      {
-        from_port   = 81
-        to_port     = 81
-        protocol    = "tcp"
-        description = "http-nginx-status"
-        cidr_blocks = "0.0.0.0/0"
-      },
-    ]
+  ingress_rules       = ["https-443-tcp", "http-8080-tcp", "all-icmp", "ssh-tcp"]
+    # ingress_with_cidr_blocks = [
+    #   {
+    #     from_port   = 81
+    #     to_port     = 81
+    #     protocol    = "tcp"
+    #     description = "http-nginx-status"
+    #     cidr_blocks = "0.0.0.0/0"
+    #   },
+    # ]
   egress_rules        = ["all-all"]
 }

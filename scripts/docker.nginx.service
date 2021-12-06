@@ -12,7 +12,8 @@ ExecStart=/usr/bin/docker run --name nginx \
                               --rm \
                               -v /opt/gitrepo/html:/usr/share/nginx/html:ro \
                               -v /opt/gitrepo/scripts/nginx-stub_status.config:/etc/nginx/conf.d/stub_status.conf:ro \
-                              -p 80:80 -p 81:81 \
+                              # 8080 web server, 81 nginx-status \
+                              -p 8080:80 -p 127.0.0.1:81:81 \
                               nginx:stable
 [Install]
 WantedBy=multi-user.target
