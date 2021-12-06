@@ -50,13 +50,19 @@ db: List[LogMsg] = []
 
 @app.on_event("startup")
 async def loadLogs():
+    logger=logging.getLogger("repeat")
+    logger.setLevel(logging.INFO)
+    logger.debug(f"loadLogs: started")
     linecount = 0
-    with open(config["log_file"], "r") as file_object:
-        for line in file_object.readlines():
-            if line.strip():
-                await addLogToDb(json.loads(line))
-                linecount += 1
-    print(f"Loaded {linecount} log lines len(db):{len(db)}")
+    if os.path.isfile(config["log_file"]):
+        with open(config["log_file"], "r") as file_object:
+            for line in file_object.readlines():
+                if line.strip():
+                    await addLogToDb(json.loads(line))
+                    linecount += 1
+        logger.info(f"loadLogs: Loaded {linecount} log lines len(db):{len(db)}")
+    else:
+        logger.warn(f"loadLogs: no log file {config['log_file']}")
 
 async def addLogToDb(log: dict):
     # Limit in memory to 7days @10sec = 60480 entries
@@ -171,7 +177,7 @@ async def run(cmd,logger):
     #if stdout:
     #    print(f'[stdout]\n{stdout.decode()}')
     if stderr:
-        logger.error(f'[stderr]\n{stderr.decode()}')
+        logger.error(f'run: [stderr] for # {cmd}\n     {stderr.decode()}')
     return stdout.decode(), proc.returncode
 
 if __name__ == "__main__":

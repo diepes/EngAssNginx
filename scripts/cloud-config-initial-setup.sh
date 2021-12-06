@@ -10,7 +10,7 @@ systemctl,start --no-block, docker.service
 systemctl enable docker.nginx.service
 systemctl start --no-block docker.nginx.service
 
-python3 -m pip -r requirements.txt
+python3 -m pip install -r requirements.txt
 
 echo "*/5 * * * * root /opt/gitrepo/scripts/cron.sh 2>&1 | /dev/null" > /etc/cron.d/gitrepo
 
