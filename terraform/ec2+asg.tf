@@ -1,13 +1,4 @@
-# resource "aws_eip" "server" {
-#   vpc      = true
-#   tags = {
-#       Name = "${var.prefix}-eip"
-#   }
-# }
-# resource "aws_eip_association" "eip_assoc" {
-#   instance_id   = aws_instance.server.id
-#   allocation_id = aws_eip.server.id
-# }
+# Deploy ec2 server in ASG, to restart on failure.
 resource "aws_launch_template" "front-end" {
   name_prefix   = "${var.prefix}-tf-01"
   image_id      = data.aws_ami.amazon-linux-2.id
@@ -27,11 +18,12 @@ resource "aws_launch_template" "front-end" {
       Name = "${var.prefix}-web-server"
     }
   }
-
   lifecycle {
     create_before_destroy = true
   }
 }
+
+
 resource "aws_autoscaling_group" "front-end" {
   name                 = "${var.prefix}-tf-asg"
   launch_template {
@@ -48,21 +40,6 @@ resource "aws_autoscaling_group" "front-end" {
   lifecycle { create_before_destroy = true }
 }
 
-
-# resource "aws_instance" "server" {
-#   ami           = data.aws_ami.amazon-linux-2.id
-#   instance_type = "t2.micro"
-#   subnet_id = module.vpc.public_subnets[0]
-#   associate_public_ip_address = true
-#   vpc_security_group_ids = flatten([
-#                               module.security_group.security_group_id, 
-#                             ])
-#   key_name = aws_key_pair.ssh_key.key_name
-#   user_data_base64 = base64encode(templatefile("ec2-userdata.yaml",{ HOSTNAME = "${var.prefix}-web-server" }))
-#   tags = {
-#     Name = "${var.prefix}-web-server"
-#   }
-# }
 
 resource "aws_key_pair" "ssh_key" {
   key_name   = "nginx_server"
