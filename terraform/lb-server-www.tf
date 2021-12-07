@@ -34,8 +34,8 @@ resource "aws_security_group" "lb" {
     Name = "${var.prefix}-lb-public"
   }
 }
-resource "aws_lb" "front_end" {
-  name          = "front-end"
+resource "aws_lb" "server" {
+  name          = "${var.prefix}-server"
   internal      = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb.id]
@@ -47,8 +47,8 @@ resource "aws_lb" "front_end" {
     aws_lb_target_group.front_end,
   ]
 }
-resource "aws_lb_listener" "front_end" {
-  load_balancer_arn = aws_lb.front_end.arn
+resource "aws_lb_listener" "server" {
+  load_balancer_arn = aws_lb.server.arn
   port              = 80
   protocol          = "HTTP"
   #port              = "443"
@@ -60,9 +60,29 @@ resource "aws_lb_listener" "front_end" {
     target_group_arn = aws_lb_target_group.front_end.arn
   }
 }
+
+resource "aws_lb_listener_rule" "api" {
+  listener_arn = aws_lb_listener.server.arn
+  priority     = 100
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.api.arn
+  }
+  condition {
+    path_pattern {
+      values = ["/api/*"]
+    }
+  }
+}
 resource "aws_lb_target_group" "front_end" {
-  name     = "${var.prefix}-target-group"
+  name     = "${var.prefix}-tg-www"
   port     = 8080
+  protocol = "HTTP"
+  vpc_id   = module.vpc.vpc_id
+}
+resource "aws_lb_target_group" "api" {
+  name     = "${var.prefix}-tg-api"
+  port     = 80
   protocol = "HTTP"
   vpc_id   = module.vpc.vpc_id
 }
@@ -70,6 +90,10 @@ resource "aws_lb_target_group" "front_end" {
 resource "aws_autoscaling_attachment" "front_end" {
   autoscaling_group_name = aws_autoscaling_group.front-end.id
   alb_target_group_arn   = aws_lb_target_group.front_end.arn
+}
+resource "aws_autoscaling_attachment" "api" {
+  autoscaling_group_name = aws_autoscaling_group.front-end.id
+  alb_target_group_arn   = aws_lb_target_group.api.arn
 }
 
 # resource "aws_lb_listener_certificate" "front_end" {

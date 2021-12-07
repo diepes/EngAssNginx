@@ -6,11 +6,12 @@ cp /opt/gitrepo/scripts/uvicorn.health-status.service  /etc/systemd/system/uvico
 systemctl daemon-reload
 
 systemctl enable docker.service
-systemctl,start --no-block, docker.service
+systemctl start --no-block, docker.service
 
 systemctl enable docker.nginx.service
 systemctl start --no-block docker.nginx.service
 
+cd /opt/gitrepo
 python3 -m pip install -r requirements.txt
 systemctl enable uvicorn.health-status.service
 systemctl start --no-block uvicorn.health-status.service

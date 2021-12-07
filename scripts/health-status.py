@@ -72,7 +72,7 @@ async def addLogToDb(log: dict):
         del db[maxlen:]
 
 
-@app.get("/logs")
+@app.get("/api/logs")
 async def fetch_logs():
     return db
        
