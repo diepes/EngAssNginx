@@ -11,7 +11,13 @@ resource "aws_launch_template" "front-end" {
                               module.security_group.security_group_id, 
                             ])
   key_name  = aws_key_pair.ssh_key.key_name
-  user_data = base64encode(templatefile("ec2-userdata.yaml",{ HOSTNAME = "${var.prefix}-web-server" }))
+  user_data = base64encode(templatefile("ec2-userdata.yaml",
+                                         { HOSTNAME = "${var.prefix}-web-server",
+                                           GITREPO = var.gitrepo,
+                                           GITBRANCH = var.gitbranch,
+                                          }
+                                        )
+                          )
   tag_specifications {
     resource_type = "instance"
     tags = {

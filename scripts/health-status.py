@@ -19,11 +19,22 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
-app = FastAPI()
-# fastapi_logger.setLevel(logging.DEBUG)  # :( ignored still only warn level logs
-# fastapi_logger.debug("Start debug - logger.")
-# fastapi_logger.info("Start info - logger.")
-# fastapi_logger.warning("Start warn - logger.")
+app = FastAPI(
+        title="EngAssNginx",
+        description="Nginx terraform deployment",
+        version="0.0.1",
+        docs_url="/api/doc",
+        terms_of_service="http://example.com/terms/",
+        contact={
+            "name": "Pieter@Github",
+            "url": "https://github.com/diepes/",
+            "email": "github@vigor.nz",
+        },
+        license_info={
+            "name": "GPL 3.0",
+            "url": "https://www.gnu.org/licenses/gpl-3.0.en.html",
+        },
+    )
  
 global config
 if os.path.isfile("flag-this-is-dev.txt"):
