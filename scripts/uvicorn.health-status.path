@@ -1,0 +1,5 @@
+[Path]
+PathChanged=/opt/gitrepo/scripts/health-status.py
+
+[Install]
+WantedBy=multi-user.target

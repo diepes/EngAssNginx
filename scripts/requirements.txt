@@ -2,5 +2,5 @@ fastapi[all]
 fastapi-utils
 aiohttp
 pytz
-#uvicorn  # installed as part of fastapi
+uvicorn
 #gunicorn
