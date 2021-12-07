@@ -34,7 +34,7 @@ resource "aws_autoscaling_group" "front-end" {
   name                 = "${var.prefix}-tf-asg"
   launch_template {
     id      = aws_launch_template.front-end.id
-    version = "$Latest"
+    version = aws_launch_template.front-end.latest_version
   }
   vpc_zone_identifier  = module.vpc.public_subnets
   desired_capacity     = 1
@@ -44,6 +44,8 @@ resource "aws_autoscaling_group" "front-end" {
   health_check_grace_period = 300
   health_check_type         = "ELB"
   lifecycle { create_before_destroy = true }
+  #
+  target_group_arns = [ aws_lb_target_group.www.arn, aws_lb_target_group.api.arn ]
 }
 
 
