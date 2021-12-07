@@ -24,7 +24,8 @@ app = FastAPI(
         description="Nginx terraform deployment",
         version="0.0.1",
         docs_url="/api/doc",
-        terms_of_service="http://example.com/terms/",
+        root_path="/api",
+        #terms_of_service="http://example.com/terms/",
         contact={
             "name": "Pieter@Github",
             "url": "https://github.com/diepes/",
