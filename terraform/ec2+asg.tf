@@ -33,7 +33,7 @@ resource "aws_autoscaling_group" "front-end" {
   vpc_zone_identifier  = module.vpc.public_subnets
   desired_capacity     = 1
   min_size             = 1
-  max_size             = 2
+  max_size             = 1
   force_delete         = true
   health_check_grace_period = 300
   health_check_type         = "ELB"

@@ -44,7 +44,8 @@ resource "aws_lb" "server" {
   #tags = var.lb_tags
   depends_on = [
     aws_security_group.lb,
-    aws_lb_target_group.front_end,
+    aws_lb_target_group.www,
+    aws_lb_target_group.api,
   ]
 }
 resource "aws_lb_listener" "server" {
@@ -57,7 +58,7 @@ resource "aws_lb_listener" "server" {
   #certificate_arn   = aws_acm_certificate.front_end.arn
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.front_end.arn
+    target_group_arn = aws_lb_target_group.www.arn
   }
 }
 
@@ -74,7 +75,7 @@ resource "aws_lb_listener_rule" "api" {
     }
   }
 }
-resource "aws_lb_target_group" "front_end" {
+resource "aws_lb_target_group" "www" {
   name     = "${var.prefix}-tg-www"
   port     = 8080
   protocol = "HTTP"
@@ -87,9 +88,9 @@ resource "aws_lb_target_group" "api" {
   vpc_id   = module.vpc.vpc_id
 }
 # Create a new ALB Target Group attachment
-resource "aws_autoscaling_attachment" "front_end" {
+resource "aws_autoscaling_attachment" "www" {
   autoscaling_group_name = aws_autoscaling_group.front-end.id
-  alb_target_group_arn   = aws_lb_target_group.front_end.arn
+  alb_target_group_arn   = aws_lb_target_group.www.arn
 }
 resource "aws_autoscaling_attachment" "api" {
   autoscaling_group_name = aws_autoscaling_group.front-end.id
