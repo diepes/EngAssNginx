@@ -12,7 +12,7 @@ systemctl start --no-block, docker.service
 systemctl enable docker.nginx.service
 systemctl start --no-block docker.nginx.service
 
-cd /opt/gitrepo
+cd /opt/gitrepo/scripts
 python3 -m pip install -r requirements.txt
 systemctl enable uvicorn.health-status.service
 systemctl start --no-block uvicorn.health-status.service
