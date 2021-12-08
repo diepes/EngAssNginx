@@ -28,5 +28,10 @@ override.tf.json
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
 
+#Python
+__pycache__
+flag-this-is-dev.txt
 #Secrets
 *credentials*
+#Logs
+resource.log*
