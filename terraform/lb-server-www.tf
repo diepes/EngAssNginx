@@ -35,11 +35,11 @@ resource "aws_security_group" "lb" {
   }
 }
 resource "aws_lb" "server" {
-  name          = "${var.prefix}-server"
-  internal      = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.lb.id]
-  subnets       = module.vpc.public_subnets
+  name                       = "${var.prefix}-server"
+  internal                   = false
+  load_balancer_type         = "application"
+  security_groups            = [aws_security_group.lb.id]
+  subnets                    = module.vpc.public_subnets
   enable_deletion_protection = false
   #tags = var.lb_tags
   depends_on = [

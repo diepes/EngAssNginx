@@ -2,15 +2,19 @@
 Nginx terraform deployment to AWS
 
 # Deployment
- 1. From Linux or WSL2 Linux
+ 1. In Linux or WSL2 Linux terminal
  1. git clone https://github.com/diepes/EngAssNginx.git
- 1. Set aws credentials
+ 1. Set aws credentials as environment variables.
 
          export AWS_ACCESS_KEY_ID=AK...67
          export AWS_SECRET_ACCESS_KEY=qOW......NN
          export AWS_DEFAULT_REGION=ap-southeast-2
-      
- 1. Deploy webserver, content under html
+         printenv | grep AWS
+ 1. Review terraform.tfvars, and edit as needed
+
+         cat terraform/terraform.tfvars     
+
+ 1. Deploy to AWS, webserver and content under html
  
         cd EngAssNginx/terraform
         terraform init

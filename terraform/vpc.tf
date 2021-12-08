@@ -1,5 +1,5 @@
 locals {
-    region = var.aws_region
+  region = var.aws_region
 }
 
 
@@ -7,7 +7,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.11.0"
 
-  name = "${var.prefix}"
+  name = var.prefix
   cidr = "10.0.0.0/16"
 
   azs             = ["${local.region}a", "${local.region}b", "${local.region}c"]
