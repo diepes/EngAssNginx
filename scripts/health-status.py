@@ -89,10 +89,14 @@ async def fetch_logs():
     return db
        
 
-
 @app.get("/")
 async def root():
     return {"message": f"Hello World counter={counter}"}
+
+@app.get("/api/update-website")
+async def api_update_website():
+    procdocker,exitcode = run("/opt/gitrepo/scripts/cron.sh", logger=logging.getLogger("repeat"))
+    return f"Looking for update to website  ... exit={exitcode} {procdocker}"
 
 async def getLogs():
     logdata = config.logdata  # List containing log lines

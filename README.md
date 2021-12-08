@@ -20,12 +20,22 @@ Nginx terraform deployment to AWS
         terraform init
         terraform apply
 
-  1. The output of the terraform script should provide the aws LB url.
+  1. The output of the terraform script should provide the aws LB url, open in browser.
 
          export URL="nginx-server......ap-southeast-2.elb.amazonaws.com"
          curl -is http://$URL/
          curl -is http://$URL/resources.log
          curl -is http://$URL/api/log
+
+  1. Update website
+
+         edit html/index.html
+         git add .
+         git commit -m "Updated html/index.html"
+         git push
+         curl http:/$URL/api/update-website
+
+         # Reload web page should be visible in <5 min
 
 # ToDo
  1. remove ssh access from sg - for production deployment. Maybe add ssm access ?
