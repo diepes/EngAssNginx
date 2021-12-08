@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from fastapi import FastAPI
+from fastapi import FastAPI, Path, Query
+from fastapi.encoders import jsonable_encoder
 from fastapi_utils.tasks import repeat_every
 import logging
 from fastapi.logger import logger as fastapi_logger
@@ -10,8 +11,10 @@ import aiohttp
 import re
 import json
 import datetime
+import time
 import pytz
 import os
+import pathlib
 #from yarl import cache_configure
 logger = logging.getLogger("repeat")
 # # Console handler
@@ -24,7 +27,8 @@ app = FastAPI(
         description="Nginx terraform deployment",
         version="0.0.1",
         docs_url="/api/doc",
-        root_path="/api",
+        #root_path="/api",  #prefixes to incoming request e.g / becomes /api
+        openapi_url="/api/openapi.json",
         #terms_of_service="http://example.com/terms/",
         contact={
             "name": "Pieter@Github",
@@ -40,8 +44,8 @@ app = FastAPI(
 global config
 if os.path.isfile("flag-this-is-dev.txt"):
     config = {  # Developement
-        "log_file":   "/var/log/monitor-nginx.log",
-        "status_url": "http://52.64.137.163:81/nginx_status",
+        "log_file":   "../html/resource.log",
+        "status_url": "http://127.0.0.1:81/nginx_status",
     }
 else:
     config = {  # Production
@@ -49,11 +53,12 @@ else:
         "status_url": "http://127.0.0.1:81/nginx-status",
     }
 global counter
-counter = 1
+counter = 0
 
 class LogMsg(BaseModel):
-  date: datetime.datetime
-  logmsg: dict
+  #t: datetime.datetime
+  t: int
+  log: dict
 
 #class Logs(BaseModel):
 #    logs: list[LogMsg]
@@ -66,36 +71,98 @@ async def loadLogs():
     logger.setLevel(logging.INFO)
     logger.debug(f"loadLogs: started")
     linecount = 0
-    if os.path.isfile(config["log_file"]):
-        with open(config["log_file"], "r") as file_object:
+    path = pathlib.Path( config["log_file"] ).resolve()
+    if os.path.isfile(path):
+        with open(path, "r") as file_object:
             for line in file_object.readlines():
                 if line.strip():
-                    await addLogToDb(json.loads(line))
+                    j = json.loads(line)
+                    await addLogToDb(j["t"],j["log"] , insert = False) #Logs read from old to new
                     linecount += 1
-        logger.info(f"loadLogs: Loaded {linecount} log lines len(db):{len(db)}")
+        logger.info(f"loadLogs: Loaded {linecount} log lines len(db):{len(db)} from {path}")
     else:
-        logger.warning(f"loadLogs: no log file {config['log_file']}")
+        logger.warning(f"loadLogs: no log file {config['log_file']} -> {path}")
 
-async def addLogToDb(log: dict):
+async def addLogToDb(t: datetime.datetime, log: dict, insert: bool = True):
     # Limit in memory to 7days @10sec = 60480 entries
     maxlen = 6 * 60 * 24 * 7
-    db.insert(0, LogMsg( date = log['time'], logmsg = log))    
+    newlog = LogMsg( t = t, log = log)
+    if insert:
+        db.insert(0, newlog)
+    else:
+        db.append(newlog)
+
     if len(db) > maxlen:
         del db[maxlen:]
+    # return json, for new records we write to log file
+    return jsonable_encoder(newlog)
 
 
 @app.get("/api/logs")
 async def fetch_logs():
     return db
-       
+@app.get("/api/logs/{count}")
+async def fetch_count_logs(
+              count: int = Path(..., title="Number of logs"),
+              ):
+        return db[:count]       
 
-@app.get("/")
+
+
+@app.get("/api/logs/searchregex/{regex}")
+async def log_search_regex(
+              regex: str = Path(..., title='Slow Regex search e.g. "2021-12-08T21"')
+):
+        r = re.compile(regex)
+        tempdb: List[LogMsg] = []
+        for l in db:
+            if r.findall(json.dumps(l.logmsg)):
+                tempdb.append(l)
+        return tempdb
+@app.get("/api/logs/search/{fld}/{regex}")
+async def log_search_path(
+              fld: str = Path(..., title="Field to search e.g. docker.CPUPerc"),
+              regex: str = Path(..., title="Regex e.g. 0.00")
+):
+    r = re.compile(regex)
+    tempdb: List[LogMsg] = []
+    for l in db:
+        fldvalue = await find(fld,l.logmsg)
+        if fldvalue:
+            if r.findall(fldvalue):
+                tempdb.append(l)
+        #else:
+            #logger.warn(f"did not find {fld} in {l.logmsg.keys()}")
+    return tempdb
+
+@app.get("/api/logs/searchtime/")
+async def log_search_time(start: int = 0, end: int = 0):
+    filtered = []
+    for l in db:
+        if l.t > start and l.t < end:
+            filtered.append(l)
+    return filtered
+
+
+async def find(key: str, value: dict) -> str:
+    for k, v in value.items():
+        if k == key:
+            return v
+        elif isinstance(v, dict):
+            result = find(key, v)
+            return result
+        else:
+          return None
+
+#@app.get("/")
+@app.get("/api")
 async def root():
-    return {"message": f"Hello World counter={counter}"}
+    return {"logs_generated": counter}
 
 @app.get("/api/update-website")
 async def api_update_website():
-    procdocker,exitcode = run("/opt/gitrepo/scripts/cron.sh", logger=logging.getLogger("repeat"))
+    (procdocker,exitcode) = await run("/opt/gitrepo/scripts/cron.sh", logger=logging.getLogger("repeat"))
+    #procdocker,exitcode = await run(f"docker stats --no-stream {name} --format '{{{{ json . }}}}'", logger)
     return f"Looking for update to website  ... exit={exitcode} {procdocker}"
 
 async def getLogs():
@@ -125,17 +192,18 @@ async def run_10s_schedule():
     status_docker = await task_docker
     status_nginx  = await task_nginx
     logger.debug( "retrieved status results")
-    status = {"time": local_now.isoformat(), "docker" : status_docker, "nginx": status_nginx}
-    await addLogToDb(status)
-    with open(config["log_file"], "a") as file_object:
-        file_object.write(json.dumps(status))
+    log = {"timestamp": local_now , "docker" : status_docker, "nginx": status_nginx}
+    newlog = await addLogToDb(int(utc_now.timestamp()), log)
+    path = pathlib.Path( config["log_file"] ).resolve()
+    with open(path, "a") as file_object:
+        file_object.write(json.dumps(newlog))
         file_object.write('\n')
-    logger.debug(f"END run_10s_schedule!!! #{counter} ##{status}")
+    logger.debug(f"END run_10s_schedule!!! #{counter} ##{newlog}")
 
 
 async def getDockerStatus(name: str, logger):
     # docker stats nginx   --no-stream   --format "{{ json . }}"
-    procdocker,exitcode = await run(f"docker stats --no-stream {name} --format '{{{{ json . }}}}'", logger)
+    (procdocker,exitcode) = await run(f"docker stats --no-stream {name} --format '{{{{ json . }}}}'", logger)
     docker_info = { "exitcode": exitcode, "Name": name }
     logger.debug(f"getDockerStatus ... {exitcode}")
     if exitcode == 0:
@@ -150,6 +218,8 @@ async def getNginxStatus(status_url: str, logger):
                 nginx_text = await resp.text(encoding='ascii')
         except aiohttp.client_exceptions.ServerTimeoutError:
             response = "timeout"
+        except aiohttp.client_exceptions.ClientConnectorError:
+            response = "connection-error"
         else:
             response = resp.status
         logger.debug("getNginxStatus ...")
@@ -194,7 +264,8 @@ async def run(cmd,logger):
     #    print(f'[stdout]\n{stdout.decode()}')
     if stderr:
         logger.error(f'run: [stderr] for # {cmd}\n     {stderr.decode()}')
-    return stdout.decode(), proc.returncode
+        return (stderr.decode(), proc.returncode)
+    return (stdout.decode(), proc.returncode)
 
 if __name__ == "__main__":
     import uvicorn
