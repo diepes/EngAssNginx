@@ -5,7 +5,9 @@ resource "aws_launch_template" "front-end" {
   instance_type                        = "t2.micro"
   instance_initiated_shutdown_behavior = "terminate"
   # spot_price    = "0.045"
-  # iam_instance_profile { name = "" } 
+  iam_instance_profile {
+     name = aws_iam_instance_profile.ssm-profile.name
+  }
   #associate_public_ip_address = true
   vpc_security_group_ids = flatten([
     module.security_group.security_group_id,
@@ -72,25 +74,3 @@ data "aws_ami" "amazon-linux-2" {
   }
 }
 
-module "security_group" {
-  source  = "terraform-aws-modules/security-group/aws"
-  version = "4.7.0"
-
-  name        = "${var.prefix}-server"
-  description = "Security group for web EC2 instance"
-  vpc_id      = module.vpc.vpc_id
-
-  # https://github.com/terraform-aws-modules/terraform-aws-security-group/blob/master/rules.tf
-  ingress_cidr_blocks = ["0.0.0.0/0"]
-  ingress_rules       = ["http-80-tcp", "all-icmp", "ssh-tcp"] # Should be internal, demo api, and ssh 
-  ingress_with_cidr_blocks = [
-    {
-      from_port   = 8080
-      to_port     = 8080
-      protocol    = "tcp"
-      description = "http-lb-access"
-      cidr_blocks = "10.0.0.0/8"
-    },
-  ]
-  egress_rules = ["all-all"]
-}

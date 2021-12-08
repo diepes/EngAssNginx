@@ -7,7 +7,7 @@ aws_region   = "ap-southeast-2"
 
 # Install setup scripts and ./html content
 gitrepo      = "https://github.com/diepes/EngAssNginx.git"
-gitbranch    = "test"
+gitbranch    = "main"
 
 # Prefix for aws tags
 prefix       = "nginx"
