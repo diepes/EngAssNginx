@@ -9,9 +9,9 @@ output "curl_website_lb_url" {
   value = "# curl -is http://${aws_lb.server.dns_name}/\n"
 }
 
-output "_01_setUrlWith" {
-  value = " export URL='${aws_lb.server.dns_name}' "
+output "loadbalancerURL" {
+  value = "${aws_lb.server.dns_name}"
 }
-output "_02_aws_region" {
+output "aws_region" {
   value = var.aws_region
 }

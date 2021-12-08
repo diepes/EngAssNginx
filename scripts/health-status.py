@@ -98,7 +98,7 @@ async def addLogToDb(t: datetime.datetime, log: dict, insert: bool = True):
     return jsonable_encoder(newlog)
 
 
-@app.get("/api/logs")
+@app.get("/api/logs/")
 async def fetch_logs():
     return db
 @app.get("/api/logs/{count}")
@@ -155,7 +155,7 @@ async def find(key: str, value: dict) -> str:
           return None
 
 #@app.get("/")
-@app.get("/api")
+@app.get("/api/")
 async def root():
     return {"logs_generated": counter}
 

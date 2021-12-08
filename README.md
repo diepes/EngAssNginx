@@ -2,17 +2,28 @@
 Nginx terraform deployment to AWS
 
 # Deployment
- 1. In Linux or WSL2 Linux terminal
+
+ 1. In Linux or WSL2 Linux , and utilities 
+    1. Utilities needed.
+       - terraform > v1
+       - git
+       - curl, jq (optional)
+
  1. git clone https://github.com/diepes/EngAssNginx.git
+    * For testing, might be better to fork repo, checkout fork, and update terraform.tfvars gitrepo
+
  1. Set aws credentials as environment variables.
 
          export AWS_ACCESS_KEY_ID=AK...67
          export AWS_SECRET_ACCESS_KEY=qOW......NN
          export AWS_DEFAULT_REGION=ap-southeast-2
-         printenv | grep AWS
+         printenv | grep AWS  
+     * verify with $ `aws sts get-caller-identity`
+
  1. Review terraform.tfvars, and edit as needed
 
          cat terraform/terraform.tfvars     
+     * Note: if gitbranch changed, remember to create branch with same name.
 
  1. Deploy to AWS, webserver and content under html
  
@@ -22,10 +33,16 @@ Nginx terraform deployment to AWS
 
   1. The output of the terraform script should provide the aws LB url, open in browser.
 
-         export URL="nginx-server......ap-southeast-2.elb.amazonaws.com"
+         export URL=$( terraform output | grep -oP '(?<=loadbalancerURL = ").+(?=")' )
+         echo "URL=$URL"
+         # export URL="nginx-server......ap-southeast-2.elb.amazonaws.com"
          curl -is http://$URL/
          curl -is http://$URL/resources.log
-         curl -is http://$URL/api/log
+         curl -is http://$URL/api/log/
+
+         curl -s -X "GET"  -H "accept: application/json" \
+                  "http://$URL/api/logs/searchtime/?start=$(date +%s --date='1 minutes ago')&end=$(date +%s)" \
+                  | jq -c '.[]' 
 
   1. Update website
 
@@ -38,11 +55,13 @@ Nginx terraform deployment to AWS
          # Reload web page should be visible in <5 min
 
 # ToDo
+
  1. remove ssh access from sg - for production deployment. Maybe add ssm access ?
  2. terraform/ec2-userdata.yaml  chainge branche from "test" to "main" git checkout
  3. remove terraform/asg+lb.tf if not planning to use it.
 
 # Exercise (Infra)
+<details>
 Use Ansible and/or Terraform to automate the process of creating an AWS EC2 instance and
 complete the following tasks:
 1. The deployment should take AWS credentials and AWS region as input parameters.
@@ -86,23 +105,8 @@ Bonus Points
 1. Show the result of the resource.log on a webpage served from the NGINX server
    if you have any questions about the assignment feel free to reach out to us.
    Done /resource.log
-# Prerequisites
-  1. install terraform commandline util >=v1.0.11
-     * https://www.terraform.io/downloads.html
-  2. aws user and access keys, IAM users should belong to AdminUsers
-     * Set env variables with correct credentials e.g.
-     ```
-     export AWS_ACCESS_KEY_ID=<aws-access-id>
-     export AWS_SECRET_ACCESS_KEY=<aws-secret>
-     export AWS_DEFAULT_REGION=ap-southeast-2
-     ```
-     verify with ```aws sts get-caller-identity```
-
-# Infra deployment
-   1. cd terraform
-   2. terraform init
-   3. terraform apply
+</details>
 
 
 
-
+The END.
