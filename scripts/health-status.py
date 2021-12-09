@@ -270,5 +270,5 @@ async def run(cmd,logger):
 if __name__ == "__main__":
     import uvicorn
     print("MAIN #1!!!")
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=82, log_level="info")
     print("MAIN #2!!!")

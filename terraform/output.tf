@@ -5,6 +5,10 @@
 # output "curl_mon_api" {
 #     value = "# curl -is http://${aws_instance.server.public_ip}/logs\n"
 # }
+
+output "gitbranch" {
+  value = var.gitbranch
+}
 output "curl_website_lb_url" {
   value = "# curl -is http://${aws_lb.server.dns_name}/\n"
 }
