@@ -19,6 +19,7 @@ resource "aws_launch_template" "front-end" {
       GITBRANCH = var.gitbranch,
     }
     )
+  tags = var.tags
   )
   tag_specifications {
     resource_type = "instance"

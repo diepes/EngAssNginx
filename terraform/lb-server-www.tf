@@ -41,7 +41,7 @@ resource "aws_lb" "server" {
   security_groups            = [aws_security_group.lb.id]
   subnets                    = module.vpc.public_subnets
   enable_deletion_protection = false
-  #tags = var.lb_tags
+  tags = var.tags
   depends_on = [
     aws_security_group.lb,
     aws_lb_target_group.www,

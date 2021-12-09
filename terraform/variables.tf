@@ -23,3 +23,8 @@ variable "prefix" {
   type        = string
   description = "prefix value used to make names uniq"
 }
+
+variable "tags" {
+  type = map(string)
+  description = "Tags for aws resources."
+}
