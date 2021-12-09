@@ -83,8 +83,9 @@ resource "aws_lb_target_group" "www" {
 }
 resource "aws_lb_target_group" "api" {
   name     = "${var.prefix}-tg-api"
-  port     = 80
+  port     = 82
   protocol = "HTTP"
+  path     = "/api/"
   vpc_id   = module.vpc.vpc_id
 }
 
