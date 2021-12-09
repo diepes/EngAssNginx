@@ -41,7 +41,7 @@ resource "aws_lb" "server" {
   security_groups            = [aws_security_group.lb.id]
   subnets                    = module.vpc.public_subnets
   enable_deletion_protection = false
-  #tags = var.lb_tags
+  tags                       = var.tags
   depends_on = [
     aws_security_group.lb,
     aws_lb_target_group.www,
@@ -60,6 +60,7 @@ resource "aws_lb_listener" "server" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.www.arn
   }
+  tags = var.tags
 }
 
 resource "aws_lb_listener_rule" "api" {
@@ -74,19 +75,22 @@ resource "aws_lb_listener_rule" "api" {
       values = ["/api/*"]
     }
   }
+  tags = var.tags
 }
 resource "aws_lb_target_group" "www" {
-  name     = "${var.prefix}-tg-www"
-  port     = 8080
-  protocol = "HTTP"
-  vpc_id   = module.vpc.vpc_id
+  name_prefix = substr("${var.prefix}-www", 0, 6)
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = module.vpc.vpc_id
 }
 resource "aws_lb_target_group" "api" {
-  name     = "${var.prefix}-tg-api"
-  port     = 82
-  protocol = "HTTP"
-  path     = "/api/"
-  vpc_id   = module.vpc.vpc_id
+  name_prefix = substr("${var.prefix}-api", 0, 6)
+  port        = 82
+  protocol    = "HTTP"
+  health_check {
+    path = "/api/"
+  }
+  vpc_id = module.vpc.vpc_id
 }
 
 # resource "aws_lb_listener_certificate" "front_end" {

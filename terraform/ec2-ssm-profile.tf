@@ -11,11 +11,11 @@ resource "aws_iam_role" "AmazonSSMManaged" {
 
 data "aws_iam_policy_document" "ssm-ec2" {
   statement {
-      principals  {
-          type = "Service"
-          identifiers = [ "ec2.amazonaws.com", ]
-      }
-      actions = [ "sts:AssumeRole", ]
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com", ]
+    }
+    actions = ["sts:AssumeRole", ]
   }
 }
 

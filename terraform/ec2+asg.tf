@@ -6,7 +6,7 @@ resource "aws_launch_template" "front-end" {
   instance_initiated_shutdown_behavior = "terminate"
   # spot_price    = "0.045"
   iam_instance_profile {
-     name = aws_iam_instance_profile.ssm-profile.name
+    name = aws_iam_instance_profile.ssm-profile.name
   }
   #associate_public_ip_address = true
   vpc_security_group_ids = flatten([
@@ -20,6 +20,7 @@ resource "aws_launch_template" "front-end" {
     }
     )
   )
+  tags = var.tags
   tag_specifications {
     resource_type = "instance"
     tags = {
