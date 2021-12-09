@@ -85,7 +85,9 @@ resource "aws_lb_target_group" "api" {
   name     = "${var.prefix}-tg-api"
   port     = 82
   protocol = "HTTP"
-  path     = "/api/"
+  health_check {
+    path     = "/api/"
+  }
   vpc_id   = module.vpc.vpc_id
 }
 
