@@ -11,8 +11,15 @@ gitrepo      = "https://github.com/diepes/EngAssNginx.git"
 gitbranch = "test"
 
 # Prefix for aws tags
-prefix       = "nginx"
+# Try to keep it short, e.g. nameprefix allows max 6 char.
+prefix       = "ngx"
 
 # Key for ssh access to instance's
 pub_key_name = "my-ssh-pub-key"
 pub_key_path = "~/.ssh/id_rsa.pub"
+
+tags = {
+    Project = "Nginx - Webserver + Monitor"
+    Env     = "Test"
+    Owner   = "P.Smit"
+    }

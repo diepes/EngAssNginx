@@ -76,13 +76,13 @@ resource "aws_lb_listener_rule" "api" {
   }
 }
 resource "aws_lb_target_group" "www" {
-  name     = "${var.prefix}-tg-www"
-  port     = 8080
+  name_prefix     = substr("${var.prefix}-www",0,6)
+  port     = 80
   protocol = "HTTP"
   vpc_id   = module.vpc.vpc_id
 }
 resource "aws_lb_target_group" "api" {
-  name     = "${var.prefix}-tg-api"
+  name_prefix  = substr("${var.prefix}-api",0,6)
   port     = 82
   protocol = "HTTP"
   health_check {
