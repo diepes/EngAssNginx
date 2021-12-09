@@ -154,7 +154,12 @@ async def find(key: str, value: dict) -> str:
         else:
           return None
 
-#@app.get("/")
+# Used by LB for health check, add head to ensure 200
+@app.get("/")
+@app.head("/")
+@app.get("/api")
+@app.head("/api")
+@app.head("/api/")
 @app.get("/api/")
 async def root():
     return {"logs_generated": counter}
