@@ -25,6 +25,6 @@ variable "prefix" {
 }
 
 variable "tags" {
-  type = map(string)
+  type        = map(string)
   description = "Tags for aws resources."
 }

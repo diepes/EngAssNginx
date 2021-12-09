@@ -14,7 +14,7 @@ output "curl_website_lb_url" {
 }
 
 output "loadbalancerURL" {
-  value = "${aws_lb.server.dns_name}"
+  value = aws_lb.server.dns_name
 }
 output "aws_region" {
   value = var.aws_region
