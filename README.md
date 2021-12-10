@@ -101,7 +101,7 @@ infrastructure automation and execute the script(s).
          - deploy behind CDN, e.g. cloudfront
          - can ajust the ASG counters to run multiple web servers.
       1. Instance crash/hang
-         - mitigated by using ASG to launce instance.  If LB detects problem with instance a new one is launched.
+         - mitigated by using ASG to launce instance.  If LB detects problem with instance a new one is launched.  Should recover in under 5min
       1. http - plain http, clear text - should be https, with dns etc.
          - Done for demo.  Just need to add dns and cert to LB.
          - deploy behind lb / cloudfront with ssl terminated on cloudfront / lb,
@@ -109,7 +109,8 @@ infrastructure automation and execute the script(s).
          - if required encrypt traffic between ec2-container(nginx) and lb, with selfsigned long lived certificate
       1. deployment down time 
            - any change to the terraform deployment result in recreation of intance.
-           - mostly mitigated by using ASG with rolling upd. as it deploys new instance before killing old.
+           - mostly mitigated by using ASG with rolling upd.
+           - asg will have to be >1 instance, as logic is stop then start new.
       1. deployment down time due to breaking html content changes.
           - add pipeline and some testing.
       1. downtime due to AZ outage or vm outage, single instance in single az

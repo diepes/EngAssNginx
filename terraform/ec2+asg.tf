@@ -44,17 +44,26 @@ resource "aws_autoscaling_group" "front-end" {
   min_size                  = 1
   max_size                  = 1
   force_delete              = true
-  health_check_grace_period = 300
+  health_check_grace_period = 120
   health_check_type         = "ELB"
-  lifecycle { create_before_destroy = true }
   #
   target_group_arns = [aws_lb_target_group.www.arn, aws_lb_target_group.api.arn]
+  #
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      # Still downtime, for 1 instance, stop then start :(
+      min_healthy_percentage = 90
+    }
+    triggers = ["tag"]
+  }
 }
 
 
 resource "aws_key_pair" "ssh_key" {
   key_name   = var.pub_key_name
   public_key = file(pathexpand(var.pub_key_path))
+  tags       = var.tags
 }
 
 data "aws_ami" "amazon-linux-2" {

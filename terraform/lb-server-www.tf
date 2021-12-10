@@ -82,13 +82,24 @@ resource "aws_lb_target_group" "www" {
   port        = 80
   protocol    = "HTTP"
   vpc_id      = module.vpc.vpc_id
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    interval            = 20
+    matcher             = "200"
+    path                = "/"
+  }
 }
 resource "aws_lb_target_group" "api" {
   name_prefix = substr("${var.prefix}-api", 0, 6)
   port        = 82
   protocol    = "HTTP"
   health_check {
-    path = "/api/"
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    interval            = 20
+    matcher             = "200"
+    path                = "/api/"
   }
   vpc_id = module.vpc.vpc_id
 }
