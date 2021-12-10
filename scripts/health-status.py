@@ -52,6 +52,7 @@ else:
         "log_file":   "/opt/gitrepo/html/resource.log",
         "status_url": "http://127.0.0.1:81/nginx-status",
     }
+# Count 10s runs
 global counter
 counter = 0
 
@@ -64,6 +65,7 @@ class LogMsg(BaseModel):
 #    logs: list[LogMsg]
 
 db: List[LogMsg] = []
+
 
 @app.on_event("startup")
 async def loadLogs():
@@ -82,6 +84,7 @@ async def loadLogs():
         logger.info(f"loadLogs: Loaded {linecount} log lines len(db):{len(db)} from {path}")
     else:
         logger.warning(f"loadLogs: no log file {config['log_file']} -> {path}")
+
 
 async def addLogToDb(t: datetime.datetime, log: dict, insert: bool = True):
     # Limit in memory to 7days @10sec = 60480 entries
@@ -108,7 +111,6 @@ async def fetch_count_logs(
         return db[:count]       
 
 
-
 @app.get("/api/logs/searchregex/{regex}")
 async def log_search_regex(
               regex: str = Path(..., title='Slow Regex search e.g. "2021-12-08T21"')
@@ -119,6 +121,8 @@ async def log_search_regex(
             if r.findall(json.dumps(l.logmsg)):
                 tempdb.append(l)
         return tempdb
+
+
 @app.get("/api/logs/search/{fld}/{regex}")
 async def log_search_path(
               fld: str = Path(..., title="Field to search e.g. docker.CPUPerc"),
@@ -131,8 +135,6 @@ async def log_search_path(
         if fldvalue:
             if r.findall(fldvalue):
                 tempdb.append(l)
-        #else:
-            #logger.warn(f"did not find {fld} in {l.logmsg.keys()}")
     return tempdb
 
 @app.get("/api/logs/searchtime/")
@@ -154,7 +156,7 @@ async def find(key: str, value: dict) -> str:
         else:
           return None
 
-# Used by LB for health check, add head to ensure 200
+
 @app.get("/")
 @app.head("/")
 @app.get("/api")
@@ -162,7 +164,10 @@ async def find(key: str, value: dict) -> str:
 @app.head("/api/")
 @app.get("/api/")
 async def root():
+    ''' Used by LB for health check, add head to ensure 200
+    '''
     return {"logs_generated": counter}
+
 
 @app.get("/api/update-website")
 async def api_update_website():
@@ -170,13 +175,6 @@ async def api_update_website():
     #procdocker,exitcode = await run(f"docker stats --no-stream {name} --format '{{{{ json . }}}}'", logger)
     return f"Looking for update to website  ... exit={exitcode} {procdocker}"
 
-async def getLogs():
-    logdata = config.logdata  # List containing log lines
-
-
-async def count():
-    global counter
-    counter = counter + 1
 
 @app.on_event("startup")
 #@repeat_every(seconds=1, logger=logger, wait_first=True)
@@ -271,6 +269,7 @@ async def run(cmd,logger):
         logger.error(f'run: [stderr] for # {cmd}\n     {stderr.decode()}')
         return (stderr.decode(), proc.returncode)
     return (stdout.decode(), proc.returncode)
+
 
 if __name__ == "__main__":
     import uvicorn

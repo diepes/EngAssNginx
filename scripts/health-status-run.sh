@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Run health-status.py server"
+echo "Run local health-status.py server"
 # bind port 8282, only root can bind 82
 uvicorn health-status:app --reload  --port 8282
 
