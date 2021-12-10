@@ -17,14 +17,14 @@ Nginx terraform deployment to AWS
 
          export AWS_ACCESS_KEY_ID=AK...67
          export AWS_SECRET_ACCESS_KEY=qOW......NN
-         export AWS_DEFAULT_REGION=ap-southeast-2
          printenv | grep AWS  
      * verify with $ `aws sts get-caller-identity`
 
  1. Review terraform.tfvars, and edit as needed
 
          cat terraform/terraform.tfvars     
-     * Note: if gitbranch changed, remember to create branch with same name.
+     * Note: 
+         * if gitbranch / repo changed, remember to create branch with same name.
 
  1. Deploy to AWS, webserver and content under html
  

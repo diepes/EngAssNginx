@@ -12,7 +12,7 @@ resource "aws_launch_template" "front-end" {
   vpc_security_group_ids = flatten([
     module.security_group.security_group_id,
   ])
-  key_name = aws_key_pair.ssh_key.key_name
+  #key_name = no ssh access.
   user_data = base64encode(templatefile("ec2-userdata.yaml",
     { HOSTNAME  = "${var.prefix}-web-server",
       GITREPO   = var.gitrepo,
@@ -59,12 +59,6 @@ resource "aws_autoscaling_group" "front-end" {
   }
 }
 
-
-resource "aws_key_pair" "ssh_key" {
-  key_name   = var.pub_key_name
-  public_key = file(pathexpand(var.pub_key_path))
-  tags       = var.tags
-}
 
 data "aws_ami" "amazon-linux-2" {
   # login user ec2-user@
