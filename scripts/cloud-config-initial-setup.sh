@@ -22,4 +22,9 @@ systemctl start --no-block uvicorn.health-status.path
 
 echo "*/5 * * * * root /opt/gitrepo/scripts/cron.sh 2>&1 | /dev/null" > /etc/cron.d/gitrepo
 
+# For Demo and Tracking add instance id to static page.
+TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` &&\
+     curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/instance-id |\
+     tee /opt/gitrepo/html/instance-id
+
 # The END.
