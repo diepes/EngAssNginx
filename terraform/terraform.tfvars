@@ -7,8 +7,8 @@ aws_region = "ap-southeast-2"
 
 # Install setup scripts and ./html content
 gitrepo   = "https://github.com/diepes/EngAssNginx.git"
-gitbranch = "main"
-#gitbranch = "inc-asg-add-fw"
+#gitbranch = "main"
+gitbranch = "inc-asg-add-fw"
 
 # Prefix for aws tags
 # Try to keep it short, e.g. nameprefix allows max 6 char.
