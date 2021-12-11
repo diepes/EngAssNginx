@@ -157,9 +157,8 @@ async def find(key: str, value: dict) -> str:
           return None
 
 
-
-def time_str(delta: int, brief=True):
-        hours, remainder = divmod(int(delta.total_seconds()), 3600)
+async def time_str(delta: int, brief=True):
+        hours, remainder = divmod(delta, 3600)
         minutes, seconds = divmod(remainder, 60)
         days, hours = divmod(hours, 24)
         if not brief:
