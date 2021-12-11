@@ -5,13 +5,15 @@ resource "aws_launch_template" "front-end" {
   instance_type                        = "t2.micro"
   instance_initiated_shutdown_behavior = "terminate"
   # spot_price    = "0.045"
+  network_interfaces {
+    associate_public_ip_address = false
+    security_groups = flatten([
+      module.security_group.security_group_id,
+    ])
+  }
   iam_instance_profile {
     name = aws_iam_instance_profile.ssm-profile.name
   }
-  #associate_public_ip_address = true
-  vpc_security_group_ids = flatten([
-    module.security_group.security_group_id,
-  ])
   #key_name = no ssh access.
   user_data = base64encode(templatefile("ec2-userdata.yaml",
     { HOSTNAME  = "${var.prefix}-web-server",
@@ -23,10 +25,11 @@ resource "aws_launch_template" "front-end" {
   tags = var.tags
   tag_specifications {
     resource_type = "instance"
-    tags = {
-      Name = "${var.prefix}-web-server"
-    }
+    tags = merge(var.tags,
+                 { Name = "${var.prefix}-web-server" },
+    )
   }
+  #Prevent error: 
   lifecycle {
     create_before_destroy = true
   }
@@ -39,7 +42,7 @@ resource "aws_autoscaling_group" "front-end" {
     id      = aws_launch_template.front-end.id
     version = aws_launch_template.front-end.latest_version
   }
-  vpc_zone_identifier       = module.vpc.public_subnets
+  vpc_zone_identifier       = module.vpc.private_subnets
   desired_capacity          = 1
   min_size                  = 1
   max_size                  = 1

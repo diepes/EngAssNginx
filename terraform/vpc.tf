@@ -19,18 +19,15 @@ module "vpc" {
   enable_ipv6 = false
 
   enable_nat_gateway = true
-  single_nat_gateway = true
+  single_nat_gateway = false
 
   # public_subnet_tags = {
   #   Name = "${var.prefix}-public"
   # }
 
-  tags = {
-    Owner       = "me"
-    Environment = "dev"
-  }
+  tags = var.tags
 
-  vpc_tags = {
-    Name = "${var.prefix}-vpc"
-  }
+  vpc_tags = merge(var.tags,
+                   { Name = "${var.prefix}-vpc" },
+  )
 }

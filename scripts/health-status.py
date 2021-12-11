@@ -167,10 +167,10 @@ async def time_str(delta: int, brief=True):
             else:
                 fmt = '{h} hours, {m} minutes, and {s} seconds'
         else:
-            fmt = '{h}h {m}m {s}s'
+            fmt = '{h:02}h{m:02}m{s:02}s'
             if days:
-                fmt = '{d}d ' + fmt
-        return fmt.format(d=int(days), h=int(hours), m=int(minutes), s=int(seconds)) 
+                fmt = '{d}days-' + fmt
+        return fmt.format(d=days, h=hours, m=minutes, s=int(seconds)) 
 
 
 @app.get("/")
