@@ -157,6 +157,23 @@ async def find(key: str, value: dict) -> str:
           return None
 
 
+
+def time_str(delta: int, brief=True):
+        hours, remainder = divmod(int(delta.total_seconds()), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        days, hours = divmod(hours, 24)
+        if not brief:
+            if days:
+                fmt = '{d} days, {h} hours, {m} minutes, and {s} seconds'
+            else:
+                fmt = '{h} hours, {m} minutes, and {s} seconds'
+        else:
+            fmt = '{h}h {m}m {s}s'
+            if days:
+                fmt = '{d}d ' + fmt
+        return fmt.format(d=days, h=hours, m=minutes, s=seconds) 
+
+
 @app.get("/")
 @app.head("/")
 @app.get("/api")
@@ -182,13 +199,15 @@ async def root():
         else:
             response = resp.status
         logger.debug("getEC2MetaData ...")
-        resp_dict = {"status": response, "url": url}
+        resp_dict = {"status": response,
+                     "uptime": time_str(time.clock_gettime(time.CLOCK_BOOTTIME)),
+                     "logs_generated": counter,
+                    }
         if response == 200:
-            resp_dict.update({"instance-id": text, "uptime": time.clock_gettime(time.CLOCK_BOOTTIME)})
-            return resp_dict
+            resp_dict.update({"instance-id": text})
         else:
-            return resp_dict
-    return {"logs_generated": counter}
+            resp_dict.update({"url": url})
+    return resp_dict
 
 
 @app.get("/api/update-website")
