@@ -9,9 +9,6 @@ packages:
   - docker
   - git
   - vim
-  #- zsh
-  #- mc
-  #- awscli 
 package_update: true
 package_upgrade: true
 package_reboot_if_required: true
@@ -24,6 +21,7 @@ runcmd:
   - [ iptables, -I, DOCKER-USER, -i, eth0, -m, comment, --comment, "Only internal to docker.", "!", -s, 10.0.0.0/8, -j, DROP,]
   - [ iptables, -I, DOCKER-USER, -i, eth0, -m, comment, --comment, "Only internal to docker.", "!", -s, 172.16.0.0/12, -j, DROP,]
   - [ iptables, -I, DOCKER-USER, -i, eth0, -m, comment, --comment, "Only internal to docker.", "!", -s, 192.168.0.0/16, -j, DROP,]
+  - [ iptables, -I, DOCKER-USER, -i, eth0, -m, comment, --comment, "Only port 80 & 82.", "!", --dport, "80,82", -j, DROP,]
   #
   - [ git, clone, --branch, "${GITBRANCH}", "${GITREPO}", /opt/gitrepo,]
   - [ /opt/gitrepo/scripts/cloud-config-initial-setup.sh,]
