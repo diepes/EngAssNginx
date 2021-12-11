@@ -166,6 +166,28 @@ async def find(key: str, value: dict) -> str:
 async def root():
     ''' Used by LB for health check, add head to ensure 200
     '''
+    TOKEN_TTL_SECONDS = 21600
+    TOKEN_HEADER = "X-aws-ec2-metadata-token"
+    TOKEN_HEADER_TTL = "X-aws-ec2-metadata-token-ttl-seconds"
+    metadata_url = "http://169.254.169.254/latest/meta-data"
+    url = f"{metadata_url}/instance-id"
+    async with aiohttp.ClientSession(conn_timeout=2) as session:
+        try:
+            async with session.get(url) as resp:
+                text = await resp.text(encoding='ascii')
+        except aiohttp.client_exceptions.ServerTimeoutError:
+            response = "timeout"
+        except aiohttp.client_exceptions.ClientConnectorError:
+            response = "connection-error"
+        else:
+            response = resp.status
+        logger.debug("getEC2MetaData ...")
+        resp_dict = {"status": response, "url": url}
+        if response == 200:
+            resp_dict.update({"instance-id": text})
+            return resp_dict
+        else:
+            return resp_dict
     return {"logs_generated": counter}
 
 
