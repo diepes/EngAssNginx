@@ -1,8 +1,18 @@
 # EngAssNginx
 Nginx terraform deployment to AWS
 
+# Overview
+  1. Git repo, ./http dir served by Nginx on deployment through terraform.
+  1. AWS LB setup for plain http/80  for demo.  (For tls/https, need dns + cert)
+  1. AWS LB setup for dual use Nginx + MonitorAPI,  Nginx - default and api mapped to path /api on same LB url.
+  1. Hardening 
+     - ec2 private ip, no ssh key
+     - SG limited to SG LB inbound.
+     - only https outbound for container load
+     - additional IPTABLES rules to limit inbound to local RFC1918 ips, port 80 & 82 Nginx+API.
+     - Further hardening recommendations below.
 # Deployment
-
+ 
  1. In Linux or WSL2 Linux , and utilities 
     1. Utilities needed.
        - terraform > v1
@@ -39,7 +49,8 @@ Nginx terraform deployment to AWS
          # export URL="nginx-server......ap-southeast-2.elb.amazonaws.com"
          curl -is http://$URL/
          curl -is http://$URL/resources.log
-         curl -is http://$URL/api/log/
+         curl -is http://$URL/api
+         curl -is http://$URL/api/doc
 
          curl -s -X "GET"  -H "accept: application/json" \
                   "http://$URL/api/logs/searchtime/?start=$(date +%s --date='1 minutes ago')&end=$(date +%s)" \
@@ -58,23 +69,26 @@ Nginx terraform deployment to AWS
 # ToDo
 
  1. SSL cert + Domain name
- 1. ASG > 1 instance.
+ 1. ASG > 1 instance. (Rolling updates)
  1. Split out monitoring from main LB.
+ 1. PrivateLink s3 - docker pull (Remove Nat GW's)
+ 1. WAF on LB, or CloudFront+WAF
 
 # Exercise (Infra)
 
 ## Use Ansible and/or Terraform to automate the process of creating an AWS EC2 instance and
 complete the following tasks:
  1. The deployment should take AWS credentials and AWS region as input parameters.
+    - Done. Set env vars. AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
  2. A VPC with the required networking, don't use the default VPC.
     - Done
  3. Provision a “t2.micro” EC2 instance, with an OS of your choice.
-    - Done
+    - Done (ASG - auto replace on LB health failure)
  4. Change the security group of the instance to ensure its security level.
     - Done: Ingress only LB tcp/80 and tcp/82 and limit to LB sg.
-       - Setup SSM role to connect to instnance for debug etc. through AWS console
+       - Setup SSM role to connect to instance for debug etc. through AWS console
        - Outound only allow https to pull container.
-       - Pull nginx container from public.ecr.aws.
+          - Pull nginx container from public.ecr.aws.
           - Future AWS PrivateGW s3.
  5. Change the OS/Firewall settings of the started instance to further enhance its security level.
     - Done.  IPTABLES, INPUT policy DROP, limit to rfc1918 ip's. 
@@ -97,8 +111,10 @@ complete the following tasks:
        1. dos - single vm, no scaling or CDN
           - deploy behind CDN, e.g. cloudfront
           - can ajust the ASG counters to run multiple web servers.
+          - add WAF.
        1. Instance crash/hang
-          - mitigated by using ASG to launce instance.  If LB detects problem with instance a new one is launched.  Should recover in under 5min
+          - mitigated by using ASG to launce instance.  
+          - If LB detects problem with instance a new one is launched.  Should recover in under 5min
        1. http - plain http, clear text - should be https, with dns etc.
           - Done for demo.  Just need to add dns and cert to LB.
           - deploy behind lb / cloudfront with ssl terminated on cloudfront / lb,
@@ -107,7 +123,7 @@ complete the following tasks:
        1. deployment down time 
           - any change to the terraform deployment result in recreation of intance.
           - mostly mitigated by using ASG with rolling upd.
-          - asg will have to be >1 instance, as logic is stop then start new.
+          - asg will have to be >=2 instance, as logic is stop then start new.
        1. deployment down time due to breaking html content changes.
           - add pipeline and some testing.
        1. downtime due to AZ outage or vm outage, single instance in single az
@@ -117,14 +133,17 @@ complete the following tasks:
   
        1. The monitoring API, should not be exposed through public URL.
           - Only done for demo, no internal monitoring.
-
+       1. add AWS WAF on LB, or Cloudfront.
+       1. run docker container as non root user.
+       1. run api python script as container.
 ### Bonus Points
  1. Show the result of the resource.log on a webpage served from the NGINX server
    if you have any questions about the assignment feel free to reach out to us.
     - Done 
-
           http://$URL/resource.log   
-          export URL=$( terraform output | grep -oP '(?<=loadbalancerURL = ").+(?=")' ); echo "URL=$URL"
-
+          export URL=$( terraform output loadbalancerURL |tr -d '"'); echo "URL=$URL"
+          # And / or
+          curl -s -X "GET"  -H "accept: application/json" \
+            "http://$URL/api/logs/searchtime/?start=$(date +%s --date='1 minutes ago')&end=$(date +%s)" |jq -c '.[]' 
 
 The END.
