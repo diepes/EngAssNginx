@@ -170,7 +170,7 @@ async def time_str(delta: int, brief=True):
             fmt = '{h}h {m}m {s}s'
             if days:
                 fmt = '{d}d ' + fmt
-        return fmt.format(d=days, h=hours, m=minutes, s=seconds) 
+        return fmt.format(d=int(days), h=int(hours), m=int(minutes), s=int(seconds)) 
 
 
 @app.get("/")
@@ -199,7 +199,7 @@ async def root():
             response = resp.status
         logger.debug("getEC2MetaData ...")
         resp_dict = {"status": response,
-                     "uptime": time_str(time.clock_gettime(time.CLOCK_BOOTTIME)),
+                     "uptime": await time_str(time.clock_gettime(time.CLOCK_BOOTTIME)),
                      "logs_generated": counter,
                     }
         if response == 200:
