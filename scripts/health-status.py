@@ -184,7 +184,7 @@ async def root():
         logger.debug("getEC2MetaData ...")
         resp_dict = {"status": response, "url": url}
         if response == 200:
-            resp_dict.update({"instance-id": text})
+            resp_dict.update({"instance-id": text, "uptime": time.clock_gettime(time.CLOCK_BOOTTIME)})
             return resp_dict
         else:
             return resp_dict
