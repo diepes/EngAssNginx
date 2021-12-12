@@ -48,8 +48,9 @@ jobs:
         curl -o ${TF_TAR} -L ${TF_DL}
         echo "${TF_SHA256}  ${TF_TAR}" | sha256sum -c -
         tar -xzf ${TF_TAR}
-        sudo mv /usr/local/bin/terraform /usr/local/bin/terraform-old || true
-        sudo ./tfswitch --latest
+        #sudo mv /usr/local/bin/terraform /usr/local/bin/terraform-old || true
+        sudo chown $USER: /usr/local/bin/terraform*
+        ./tfswitch --latest
         ls -l /usr/local/bin/terra*
         terraform --version
 
