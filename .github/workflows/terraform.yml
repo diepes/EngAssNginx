@@ -50,6 +50,7 @@ jobs:
         tar -xzf ${TF_TAR}
         sudo mv /usr/local/bin/terraform /usr/local/bin/terraform-old || true
         sudo ./tfswitch --latest
+        ls -l /usr/local/bin/terra*
         terraform --version
 
 
