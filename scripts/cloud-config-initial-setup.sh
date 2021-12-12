@@ -7,7 +7,7 @@ cp /opt/gitrepo/scripts/uvicorn.health-status.path  /etc/systemd/system/uvicorn.
 systemctl daemon-reload
 
 systemctl enable docker.service
-systemctl start --no-block, docker.service
+systemctl start --no-block docker.service
 
 systemctl enable docker.nginx.service
 systemctl start --no-block docker.nginx.service
@@ -21,5 +21,9 @@ systemctl enable uvicorn.health-status.path
 systemctl start --no-block uvicorn.health-status.path
 
 echo "*/5 * * * * root /opt/gitrepo/scripts/cron.sh 2>&1 | /dev/null" > /etc/cron.d/gitrepo
+
+
+## Harden local firewall rules
+#  Iptables rules deploys in launch template ec2-userdata.yaml
 
 # The END.
