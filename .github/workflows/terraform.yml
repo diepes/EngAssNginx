@@ -48,8 +48,12 @@ jobs:
           echo "# install tfswitch from https://github.com/warrensbox/terraform-switcher/releases"
           curl -o ${TF_TAR} -L ${TF_DL}
           echo "${TF_SHA256}  ${TF_TAR}" | sha256sum -c -
+          sleep 1
           tar -xzf ${TF_TAR}
+          sleep 1
+          sudo unlink /usr/local/bin/terraform
           sudo ./tfswitch --latest
+          sleep 1
           ls -l /usr/local/bin/terra*
           terraform --version
 
