@@ -40,6 +40,9 @@ Nginx terraform deployment to AWS
  
         cd EngAssNginx/terraform
         terraform init
+        # First deploy vpc and subnets
+        terraform apply --target module.vpc
+        # Now deploy everyting.
         terraform apply
 
   1. The output of the terraform script should provide the aws LB url, open in browser.

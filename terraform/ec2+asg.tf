@@ -26,7 +26,7 @@ resource "aws_launch_template" "front-end" {
   tag_specifications {
     resource_type = "instance"
     tags = merge(var.tags,
-                 { Name = "${var.prefix}-web-server" },
+      { Name = "${var.prefix}-web-server" },
     )
   }
   #Prevent error: 

@@ -2,7 +2,7 @@ locals {
   region = var.aws_region
 }
 
-
+# output "debug_module_vpc" { value = module.vpc }
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.11.0"
@@ -19,7 +19,11 @@ module "vpc" {
   enable_ipv6 = false
 
   enable_nat_gateway = true
-  single_nat_gateway = false
+  single_nat_gateway = true
+
+  # dns support needed for VPC Endpoint
+  enable_dns_support   = true
+  enable_dns_hostnames = true
 
   # public_subnet_tags = {
   #   Name = "${var.prefix}-public"
@@ -28,6 +32,6 @@ module "vpc" {
   tags = var.tags
 
   vpc_tags = merge(var.tags,
-                   { Name = "${var.prefix}-vpc" },
+    { Name = "${var.prefix}-vpc" },
   )
 }
