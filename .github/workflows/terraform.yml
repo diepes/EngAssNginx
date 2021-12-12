@@ -39,9 +39,19 @@ jobs:
       #  cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
       env:
         TEST: banana
+        TF-DL: https://github.com/warrensbox/terraform-switcher/releases/download/0.13.1201/terraform-switcher_0.13.1201_linux_amd64.tar.gz
+        TF-SHA256: abdddb6c409f560eaecbe13ff2b63d8f6090064061da2938c4c7d0d8605d8f57
+        TF-TAR: terraform-switcher_0.13.1201_linux_amd64.tar.gz
       run: |
-        echo "Running from env $TEST"
-        apt install terraform
+        echo "Installing tfswitch ${TF-TAR} ..."
+        # sudo apt install terraform
+        echo "install tfswitch from https://github.com/warrensbox/terraform-switcher/releases"
+        curl -o ${TF-TAR} -L ${TF-DL}; &&\
+          echo "${TF-SHA256}  ${TF-TAR}" | sha256sum -c -; &&\
+          tar -xzf ${TF-TAR}
+        ls -l
+        ./tfswitch --latest
+
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
