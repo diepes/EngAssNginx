@@ -19,3 +19,8 @@ variable "tags" {
   type        = map(string)
   description = "Tags for aws resources."
 }
+
+variable "create_privatelink_endpoints" {
+  type = bool
+  default = false
+}

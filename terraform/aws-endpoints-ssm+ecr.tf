@@ -1,57 +1,47 @@
 # Add Private Endpoints for SSM to the DMZ VPC, so we can manage the instances.
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
-
+# Note: 2021-12 add var.create_privatelink_endpoints to disable.
+#       Goal was to remove nat-gw, but no pvt endpoint for github.com, or public.ecr.aws
 locals {
-  pvtlink_endpoints = {
+  pvtlink_endpoints = var.create_privatelink_endpoints ? {
     ssm         = "com.amazonaws.${var.aws_region}.ssm"
     ssmmessages = "com.amazonaws.${var.aws_region}.ssmmessages"
     ec2messages = "com.amazonaws.${var.aws_region}.ec2messages"
     ecr-dkr     = "com.amazonaws.${var.aws_region}.ecr.dkr"
     ecr-api     = "com.amazonaws.${var.aws_region}.ecr.api"
     #ecr-public  = "com.amazonaws.${var.aws_region}.ecr-public"
-    ecr-public  = "com.amazonaws.us-east-1.ecr-public"
-  }
+    #ecr-public  = "com.amazonaws.us-east-1.ecr-public"
+  } : {}
+  pvtlink_gateways = var.create_privatelink_endpoints ? {
+    s3 = "com.amazonaws.${var.aws_region}.s3"
+  } : {}
 
   #  https://www.terraform.io/docs/language/functions/flatten.html#flattening-nested-structures-for-for_each
-  vpc_endpoint_subnet_associations = flatten(
-    [for s in module.vpc.private_subnets : [
-      for e in aws_vpc_endpoint.pvtlink : {
-        name        = join("_", [e.service_name, s, ])
-        endpoint_id = e.id
-        subnet_id   = s
-      }
-      ]
-    ]
-  )
 
 } # End locals
 
-resource "aws_vpc_endpoint" "s3" {
-  vpc_id          = module.vpc.vpc_id
-  service_name    = "com.amazonaws.${var.aws_region}.s3"
-  route_table_ids = module.vpc.private_route_table_ids
-  tags            = merge(var.tags, { Name = join("-", [var.prefix, "s3", ]) })
+resource "aws_vpc_endpoint" "gateways" {
+  for_each          = local.pvtlink_gateways
+  vpc_id            = module.vpc.vpc_id
+  service_name      = each.value
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = module.vpc.private_route_table_ids
+  tags              = merge(var.tags, { Name = join("-", [var.prefix, each.key, ]) })
 }
 
 # Interface Endpoint Type
-resource "aws_vpc_endpoint" "pvtlink" {
+resource "aws_vpc_endpoint" "interfaces" {
   for_each          = local.pvtlink_endpoints
   vpc_id            = module.vpc.vpc_id
   service_name      = each.value
-  vpc_endpoint_type = "Interface" # Type Interface requires a SG
+  vpc_endpoint_type = "Interface"
   security_group_ids = [
     aws_security_group.allow_pvtlink_tls.id,
   ]
+  subnet_ids          = module.vpc.private_subnets
   private_dns_enabled = true
   tags                = merge(var.tags, { Name = join("-", [var.prefix, each.key, ]) })
 }
-
-resource "aws_vpc_endpoint_subnet_association" "pvtlink" {
-  for_each        = { for assoc in local.vpc_endpoint_subnet_associations : "${assoc.name}" => assoc }
-  vpc_endpoint_id = each.value["endpoint_id"]
-  subnet_id       = each.value["subnet_id"]
-}
-
 
 resource "aws_security_group" "allow_pvtlink_tls" {
   name        = "allow_pvtlink_tls"

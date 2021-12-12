@@ -39,13 +39,14 @@ resource "aws_launch_template" "front-end" {
 resource "aws_autoscaling_group" "front-end" {
   name = "${var.prefix}-tf-asg"
   launch_template {
-    id      = aws_launch_template.front-end.id
-    version = aws_launch_template.front-end.latest_version
+    id = aws_launch_template.front-end.id
+    #version = aws_launch_template.front-end.latest_version
+    version = "$Latest"
   }
   vpc_zone_identifier       = module.vpc.private_subnets
   desired_capacity          = 1
   min_size                  = 1
-  max_size                  = 1
+  max_size                  = 2
   force_delete              = true
   health_check_grace_period = 120
   health_check_type         = "ELB"
