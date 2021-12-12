@@ -48,7 +48,8 @@ jobs:
         curl -o ${TF_TAR} -L ${TF_DL}
         echo "${TF_SHA256}  ${TF_TAR}" | sha256sum -c -
         tar -xzf ${TF_TAR}
-        ls -l
+        ls -l /usr/local/bin/terraform
+        /user/local/bin/terraform --version
         sudo ./tfswitch --latest
 
 
