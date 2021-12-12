@@ -15,13 +15,13 @@ package_reboot_if_required: true
 runcmd:
   - [ iptables, -A, INPUT, -i, lo, -j, ACCEPT,]
   - [ iptables, -A, INPUT, -m, state, --state, "ESTABLISHED,RELATED", -j, ACCEPT,]
-  - [ iptables, -A, INPUT, -i, eth0, -m, comment, --comment, "uvicorn health-status.py", -s, "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16", -j, ACCEPT,]
-  - [ iptables, -A, INPUT, -m, limit, --limit, "5/min", -j, LOG, --log-prefix, "iptables INPUT denied: ", --log-level, 7,]
+  - [ iptables, -A, INPUT, -i, eth0, -m, comment, --comment, "Nginx & API", -p, tcp, -m, multiport, --dports, "80,82", -s, "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16", -j, ACCEPT,]
+  # iptables -A INPUT -i eth0 -m comment --comment "uvicorn health-status.py" -p tcp --dport "82" -s "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16" -j ACCEPT
+  - [ iptables, -A, INPUT, -m, limit, --limit, "5/min", -j, LOG, --log-prefix, "iptables INPUT denied: ", --log-level, "7",]
   - [ iptables, -P, INPUT, DROP,]
-  - [ iptables, -I, DOCKER-USER, -i, eth0, -m, comment, --comment, "Only internal to docker.", "!", -s, 10.0.0.0/8, -j, DROP,]
-  - [ iptables, -I, DOCKER-USER, -i, eth0, -m, comment, --comment, "Only internal to docker.", "!", -s, 172.16.0.0/12, -j, DROP,]
-  - [ iptables, -I, DOCKER-USER, -i, eth0, -m, comment, --comment, "Only internal to docker.", "!", -s, 192.168.0.0/16, -j, DROP,]
-  - [ iptables, -I, DOCKER-USER, -i, eth0, -m, comment, --comment, "Only port 80 & 82.", "!", --dport, "80,82", -j, DROP,]
+  - [ iptables, -N, DOCKER-USER,]
+  - [ iptables, -I, DOCKER-USER, -i, eth0, -m, comment, --comment, "Only internal to docker.", -p, tcp, -m, multiport, --dports, "80,82", -s, "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16", -j, RETURN,]
+  - [ iptables, -A, DOCKER-USER, -i, eth0, -j, DROP,]
   #
   - [ git, clone, --branch, "${GITBRANCH}", "${GITREPO}", /opt/gitrepo,]
   - [ /opt/gitrepo/scripts/cloud-config-initial-setup.sh,]
