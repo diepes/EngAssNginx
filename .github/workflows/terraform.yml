@@ -55,6 +55,7 @@ jobs:
           sudo ./tfswitch --latest
           sleep 1
           ls -l /usr/local/bin/terra*
+          ls -l /root/.terraform.versions/terraform_1.1.0
           terraform --version
 
 
