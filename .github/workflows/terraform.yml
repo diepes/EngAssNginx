@@ -41,7 +41,7 @@ jobs:
         TF_DL: https://github.com/warrensbox/terraform-switcher/releases/download/0.13.1201/terraform-switcher_0.13.1201_linux_amd64.tar.gz
         TF_SHA256: abdddb6c409f560eaecbe13ff2b63d8f6090064061da2938c4c7d0d8605d8f57
         TF_TAR: terraform-switcher_0.13.1201_linux_amd64.tar.gz
-        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       run: |
           echo "#Installing tfswitch ${TF_TAR} ... $GITHUB_ACTOR"
           echo "# install tfswitch from https://github.com/warrensbox/terraform-switcher/releases"
@@ -51,7 +51,7 @@ jobs:
           sudo unlink /usr/local/bin/terraform
           ./tfswitch --latest
           # set var for next step
-          echo "tf_version=$(terraform -- |grep -i terraform)" >> $GITHUB_ENV
+          echo "tf_version=$(terraform --version |grep -i terraform)" >> $GITHUB_ENV
           # add to path
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           # action env
@@ -73,7 +73,7 @@ jobs:
     # Generates an execution plan for Terraform
     - name: Terraform Plan
       env:
-        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: cd terraform; terraform plan
 
@@ -81,7 +81,7 @@ jobs:
       # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
     - name: Terraform Apply
       env:
-        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
