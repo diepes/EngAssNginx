@@ -51,11 +51,11 @@ jobs:
           sudo unlink /usr/local/bin/terraform
           ./tfswitch --latest
           # set var for next step
-          echo "tf_version=$(terraform --version)" >> $GITHUB_ENV
+          echo "tf_version=$(terraform -- |grep -i terraform)" >> $GITHUB_ENV
           # add to path
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           # action env
-          echo "AWS: $AWS_ACCESS_KEY"
+          echo "AWS: >${AWS_ACCESS_KEY}<"
 
     - name: TF version
       run: echo "Terraform version is ${{ env.tf_version }}"
