@@ -44,17 +44,12 @@ jobs:
         TF_TAR: terraform-switcher_0.13.1201_linux_amd64.tar.gz
       run: |
           echo "#Installing tfswitch ${TF_TAR} ..."
-          set -x
           echo "# install tfswitch from https://github.com/warrensbox/terraform-switcher/releases"
           curl -o ${TF_TAR} -L ${TF_DL}
-          echo "${TF_SHA256}  ${TF_TAR}" | sha256sum -c -
-          sleep 1
-          tar -xzf ${TF_TAR}
-          sleep 1
+          echo "${TF_SHA256}  ${TF_TAR}" | sha256sum -c - || exit 1
+          tar -xzf ${TF_TAR} tfswitch
           sudo unlink /usr/local/bin/terraform
           ./tfswitch --latest
-          sleep 1
-          ls -l /usr/local/bin/terra*
           terraform --version
 
 
@@ -68,11 +63,17 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
+      env:
+        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: cd terraform; terraform plan
 
       # On push to main, build or change infrastructure according to Terraform configuration files
       # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
     - name: Terraform Apply
+      env:
+        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
         echo "Would be running Terraform apply now ..."
