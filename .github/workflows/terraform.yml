@@ -43,16 +43,15 @@ jobs:
         TF_SHA256: abdddb6c409f560eaecbe13ff2b63d8f6090064061da2938c4c7d0d8605d8f57
         TF_TAR: terraform-switcher_0.13.1201_linux_amd64.tar.gz
       run: |
-        echo "#Installing tfswitch ${TF_TAR} ..."
-        echo "# install tfswitch from https://github.com/warrensbox/terraform-switcher/releases"
-        curl -o ${TF_TAR} -L ${TF_DL}
-        echo "${TF_SHA256}  ${TF_TAR}" | sha256sum -c -
-        tar -xzf ${TF_TAR}
-        #sudo mv /usr/local/bin/terraform /usr/local/bin/terraform-old || true
-        sudo chown $USER: /usr/local/bin/terraform*
-        ./tfswitch --latest
-        ls -l /usr/local/bin/terra*
-        terraform --version
+          echo "#Installing tfswitch ${TF_TAR} ..."
+          set -x
+          echo "# install tfswitch from https://github.com/warrensbox/terraform-switcher/releases"
+          curl -o ${TF_TAR} -L ${TF_DL}
+          echo "${TF_SHA256}  ${TF_TAR}" | sha256sum -c -
+          tar -xzf ${TF_TAR}
+          sudo ./tfswitch --latest
+          ls -l /usr/local/bin/terra*
+          terraform --version
 
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
