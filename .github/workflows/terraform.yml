@@ -39,16 +39,16 @@ jobs:
       #  cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
       env:
         TEST: banana
-        TF-DL: https://github.com/warrensbox/terraform-switcher/releases/download/0.13.1201/terraform-switcher_0.13.1201_linux_amd64.tar.gz
-        TF-SHA256: abdddb6c409f560eaecbe13ff2b63d8f6090064061da2938c4c7d0d8605d8f57
-        TF-TAR: terraform-switcher_0.13.1201_linux_amd64.tar.gz
+        TF_DL: https://github.com/warrensbox/terraform-switcher/releases/download/0.13.1201/terraform-switcher_0.13.1201_linux_amd64.tar.gz
+        TF_SHA256: abdddb6c409f560eaecbe13ff2b63d8f6090064061da2938c4c7d0d8605d8f57
+        TF_TAR: terraform-switcher_0.13.1201_linux_amd64.tar.gz
       run: |
-        echo "#Installing tfswitch ${TF-TAR} ..."
+        echo "#Installing tfswitch ${TF_TAR} ..."
         # sudo apt install terraform
         echo "# install tfswitch from https://github.com/warrensbox/terraform-switcher/releases"
-        curl -o ${TF-TAR} -L ${TF-DL}
-        echo "${TF-SHA256}  ${TF-TAR}" | sha256sum -c -
-        tar -xzf ${TF-TAR}
+        curl -o ${TF_TAR} -L ${TF_DL}
+        echo "${TF_SHA256}  ${TF_TAR}" | sha256sum -c -
+        tar -xzf ${TF_TAR}
         ls -l
         ./tfswitch --latest
 
