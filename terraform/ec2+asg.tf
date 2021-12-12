@@ -8,7 +8,7 @@ resource "aws_launch_template" "front-end" {
   network_interfaces {
     associate_public_ip_address = false
     security_groups = flatten([
-      module.security_group.security_group_id,
+      module.ec2-sg.security_group_id,
     ])
   }
   iam_instance_profile {

@@ -21,6 +21,6 @@ variable "tags" {
 }
 
 variable "create_privatelink_endpoints" {
-  type = bool
+  type    = bool
   default = false
 }

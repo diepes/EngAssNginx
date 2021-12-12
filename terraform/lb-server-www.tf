@@ -6,7 +6,7 @@ resource "aws_security_group" "lb" {
   description = "Allow http/https inbound traffic"
   vpc_id      = module.vpc.vpc_id
   ingress {
-    description      = "TLS from WWW"
+    description      = "in TLS from WWW to LB listner"
     from_port        = 443
     to_port          = 443
     protocol         = "tcp"
@@ -14,7 +14,7 @@ resource "aws_security_group" "lb" {
     ipv6_cidr_blocks = []
   }
   ingress {
-    description      = "HTTP from WWW"
+    description      = "in HTTP from WWW to LB listner"
     from_port        = 80
     to_port          = 80
     protocol         = "tcp"
@@ -23,11 +23,14 @@ resource "aws_security_group" "lb" {
   }
 
   egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
+    description     = "out allow ICMP"
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = [module.ec2-sg.security_group_id, ]
+    #cidr_blocks      = ["0.0.0.0/0"]
+    #ipv6_cidr_blocks = ["::/0"]
+    #module.ec2-sg
   }
 
   tags = {
@@ -41,6 +44,7 @@ resource "aws_lb" "server" {
   security_groups            = [aws_security_group.lb.id]
   subnets                    = module.vpc.public_subnets
   enable_deletion_protection = false
+  drop_invalid_header_fields = true
   tags                       = var.tags
   depends_on = [
     aws_security_group.lb,

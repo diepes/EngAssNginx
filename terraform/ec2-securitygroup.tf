@@ -1,6 +1,6 @@
 # SG for ec2 instances
 
-module "security_group" {
+module "ec2-sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "4.7.0"
 
@@ -14,7 +14,7 @@ module "security_group" {
   ingress_rules            = []
   #
   egress_ipv6_cidr_blocks = []
-  egress_cidr_blocks      = ["0.0.0.0/0"]
+  egress_cidr_blocks      = ["0.0.0.0/0"]                   #Github.com / public.ecr.aws
   egress_rules            = ["https-443-tcp", "all-icmp", ] # Used for git, updates, SSM
 
   computed_ingress_with_source_security_group_id = [
