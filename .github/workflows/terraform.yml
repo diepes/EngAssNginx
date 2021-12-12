@@ -49,8 +49,8 @@ jobs:
         echo "${TF_SHA256}  ${TF_TAR}" | sha256sum -c -
         tar -xzf ${TF_TAR}
         ls -l /usr/local/bin/terraform
-        /user/local/bin/terraform --version
-        sudo ./tfswitch --latest
+        /usr/local/bin/terraform --version
+        #sudo ./tfswitch --latest
 
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
