@@ -8,9 +8,9 @@ swap:
 packages:
   - docker
   - git
-  - vim
-package_update: true
-package_upgrade: true
+  #- vim
+package_update: false
+package_upgrade: false
 package_reboot_if_required: true
 runcmd:
   - [ iptables, -A, INPUT, -i, lo, -j, ACCEPT,]
@@ -29,4 +29,4 @@ runcmd:
 #groups:
 # write_files:
 
-final_message: "The system is finally up, after $UPTIME seconds"
+final_message: "The system is finally up, after $UPTIME seconds, starting services ..."

@@ -10,7 +10,7 @@ output "gitbranch" {
   value = var.gitbranch
 }
 output "curl_website_lb_url" {
-  value = "# curl -is http://${aws_lb.server.dns_name}/\n"
+  value = "# curl -is http://${aws_lb.server.dns_name}/api/\n"
 }
 
 output "loadbalancerURL" {
