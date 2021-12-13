@@ -55,8 +55,7 @@ jobs:
           # add to path
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           # action env
-          echo "AWS: >${AWS_ACCESS_KEY}<"
-          printenv
+          echo "AWS: >${AWS_ACCESS_KEY_ID}<"
           echo "The END."
 
     - name: TF version
