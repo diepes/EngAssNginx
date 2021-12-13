@@ -115,7 +115,7 @@ async def fetch_count_logs(
 async def log_search_regex(
               regex: str = Path(..., title='Slow Regex search e.g. "2021-12-08T21"')
 ):
-        r = re.compile(regex)
+        r = re.compile(re.escape(regex))
         tempdb: List[LogMsg] = []
         for l in db:
             if r.findall(json.dumps(l.logmsg)):
