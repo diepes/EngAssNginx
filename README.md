@@ -47,7 +47,7 @@ Nginx terraform deployment to AWS
 
   1. The output of the terraform script should provide the aws LB url, open in browser.
 
-         export URL=$(terraform output | grep -oP '(?<=loadbalancerURL = ").+(?=")');echo "URL=$URL"
+         export URL=$(terraform output loadbalancerURL)|tr -d '"';echo "URL=$URL"
          echo "URL=$URL"
          # export URL="nginx-server......ap-southeast-2.elb.amazonaws.com"
          curl -is http://$URL/
