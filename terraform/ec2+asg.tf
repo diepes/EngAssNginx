@@ -61,6 +61,9 @@ resource "aws_autoscaling_group" "front-end" {
     }
     triggers = ["tag"]
   }
+  # Wait for vpc + nat-gw else 1st ec2 gets replaced
+  depends_on = [module.vpc,
+  ]
 }
 
 
