@@ -1,0 +1,88 @@
+
+# For Terraform cloud Reference the GitHub secret in step using the `hashicorp/setup-terraform` GitHub Action.
+#   Example:
+#     - name: Setup Terraform
+#       uses: hashicorp/setup-terraform@v1
+#       with:
+#         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+name: 'Terraform - tests'
+
+on:
+  push:
+#     branches:
+#     - main
+#     - test
+#     - dev
+  pull_request:
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: production
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Install Terraform
+      #uses: hashicorp/setup-terraform@v1
+      #with:
+      #  cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+      env:
+        TF_DL: https://github.com/warrensbox/terraform-switcher/releases/download/0.13.1201/terraform-switcher_0.13.1201_linux_amd64.tar.gz
+        TF_SHA256: abdddb6c409f560eaecbe13ff2b63d8f6090064061da2938c4c7d0d8605d8f57
+        TF_TAR: terraform-switcher_0.13.1201_linux_amd64.tar.gz
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      run: |
+          echo "#Installing tfswitch ${TF_TAR} ... $GITHUB_ACTOR"
+          echo "# install tfswitch from https://github.com/warrensbox/terraform-switcher/releases"
+          curl -o ${TF_TAR} -L ${TF_DL}
+          echo "${TF_SHA256}  ${TF_TAR}" | sha256sum -c - || exit 1
+          tar -xzf ${TF_TAR} tfswitch
+          sudo unlink /usr/local/bin/terraform
+          ./tfswitch --latest
+          # set var for next step
+          echo "tf_version=$(terraform --version |grep -i terraform)" >> $GITHUB_ENV
+          # add to path
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          # action env
+          echo "AWS: >${AWS_ACCESS_KEY_ID}<"
+          echo "The END."
+
+    - name: TF version
+      run: echo "Terraform version is ${{ env.tf_version }}"
+
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Init
+      run: cd terraform; terraform init
+
+    # Checks that all Terraform configuration files adhere to a canonical format
+    - name: Terraform Format
+      run: cd terraform; terraform fmt -check
+
+    # Generates an execution plan for Terraform
+    - name: Terraform Plan
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: cd terraform; terraform plan
+
+      # On push to main, build or change infrastructure according to Terraform configuration files
+      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+    - name: Terraform Apply
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        echo "Would be running Terraform apply now ..."
+        #cd terraform; terraform apply -auto-approve
